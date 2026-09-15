@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../community/community_provider.dart';
 import '../push/push_presentation_cache.dart';
+import '../push/push_presentation_export_recovery.dart';
 import '../relay/relay.dart';
 import 'user_profile.dart';
 import 'profile_event_parser.dart';
@@ -11,9 +12,14 @@ import 'profile_event_parser.dart';
 /// In-memory cache of user profiles, fetched in batches from the relay.
 ///
 /// Lookups requested via [get] or [preload] are coalesced into a single
-/// kind:0 batch query (NIP-01 `authors` filter) every 50ms.
+/// kind:0 batch query (NIP-01 `authors` filter) every 50ms. Larger requests
+/// drain sequentially in pages bounded by the relay response limit.
 class UserCacheNotifier extends Notifier<Map<String, UserProfile>> {
+  // The relay clamps each history response to DEFAULT_MAX_PAGE_LIMIT (1000).
+  static const _maximumProfilesPerQuery = 1000;
+
   final Set<String> _pending = {};
+  final _pushExport = PushPresentationExportRecovery();
   final Map<String, ({int createdAt, String eventId})> _profileEventOrders = {};
   int _generation = 0;
   bool _flushInFlight = false;
@@ -81,11 +87,15 @@ class UserCacheNotifier extends Notifier<Map<String, UserProfile>> {
     final generation = _generation;
     try {
       final session = ref.read(relaySessionProvider.notifier);
-      final events = await session.fetchHistory(
-        NostrFilters.profilesBatch(normalized),
-      );
-      if (!_isCurrent(generation)) return false;
-      return await _verifyAndMerge(events, generation);
+      for (final batch in _profileQueryBatches(normalized)) {
+        if (!_isCurrent(generation)) return false;
+        final events = await session.fetchHistory(
+          NostrFilters.profilesBatch(batch),
+        );
+        if (!_isCurrent(generation)) return false;
+        if (!await _verifyAndMerge(events, generation)) return false;
+      }
+      return true;
     } catch (_) {
       return false;
     }
@@ -123,22 +133,47 @@ class UserCacheNotifier extends Notifier<Map<String, UserProfile>> {
     try {
       final communityID = ref.read(activeCommunityProvider).value?.id;
       final session = ref.read(relaySessionProvider.notifier);
-      final events = await session.fetchHistory(
-        NostrFilters.profilesBatch(pubkeys),
-      );
-
-      if (!_isCurrent(generation)) return;
-      if (!await _verifyAndMerge(events, generation)) return;
-      if (communityID != null) {
-        unawaited(cacheBuzzPushProfileEvents(communityID, events));
+      var remaining = pubkeys.length;
+      for (final batch in _profileQueryBatches(pubkeys)) {
+        if (!_isCurrent(generation)) return;
+        final events = await session.fetchHistory(
+          NostrFilters.profilesBatch(batch),
+        );
+        if (!_isCurrent(generation)) return;
+        if (!await _verifyAndMerge(events, generation)) return;
+        remaining -= batch.length;
+        if (remaining == 0) {
+          // All requested pages are ready. Native export does not gate readers.
+          succeeded = true;
+          completer?.complete(true);
+        }
+        if (communityID != null) {
+          // Drain each page before fetching another, retaining at most one raw
+          // response while later requests coalesce as pubkeys in _pending.
+          await _pushExport.export(
+            () => cacheBuzzPushProfileEvents(communityID, events),
+          );
+        }
       }
-      succeeded = true;
     } catch (_) {
       // Silently fail — non-gating callers will just show pubkeys.
     } finally {
-      completer?.complete(succeeded);
+      if (completer != null && !completer.isCompleted) {
+        completer.complete(succeeded);
+      }
       _flushInFlight = false;
       if (ref.mounted && _pending.isNotEmpty) _scheduleBatch();
+    }
+  }
+
+  Iterable<List<String>> _profileQueryBatches(List<String> pubkeys) sync* {
+    for (
+      var start = 0;
+      start < pubkeys.length;
+      start += _maximumProfilesPerQuery
+    ) {
+      final end = start + _maximumProfilesPerQuery;
+      yield pubkeys.sublist(start, end < pubkeys.length ? end : pubkeys.length);
     }
   }
 
