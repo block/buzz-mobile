@@ -59,6 +59,7 @@ import 'package:buzz/shared/widgets/skeleton.dart';
 import '../../helpers/thread_ids.dart';
 
 part 'channels_page_test/presence_tests.dart';
+part 'channels_page_test/dm_recipient_layout_tests.dart';
 part 'channels_page_test/discovery_journey_tests.dart';
 part 'channels_page_test/unread_readiness_tests.dart';
 
@@ -3360,6 +3361,16 @@ void main() {
     );
   });
 
+  dmRecipientLayoutTests(
+    (overrides) => buildTestable(
+      keyboardInset: 300,
+      overrides: [
+        channelsProvider.overrideWith(() => _FakeNotifier(testChannels)),
+        ...overrides,
+      ],
+    ),
+  );
+
   testWidgets('new message sheet lists and selects relay members', (
     tester,
   ) async {
@@ -3537,7 +3548,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     final directoryUsers = [
-      for (var index = 0; index < 8; index++)
+      for (var index = 0; index < 9; index++)
         DirectoryUser(
           pubkey: 'person-$index',
           displayName: 'Long recipient name number $index',
@@ -3562,7 +3573,7 @@ void main() {
     await tester.tap(find.text('New direct message'));
     await tester.pumpAndSettle();
 
-    for (final user in directoryUsers) {
+    for (final user in directoryUsers.take(8)) {
       final result = find.byKey(Key('new-dm-person-${user.pubkey}'));
       await tester.ensureVisible(result);
       await tester.pumpAndSettle();
@@ -3579,6 +3590,31 @@ void main() {
       find.text('DMs support up to nine people, including you.'),
       findsOneWidget,
     );
+    expect(find.byKey(const Key('new-dm-person-person-8')), findsNothing);
+    final lastChip = find.byKey(const Key('new-dm-selected-person-7'));
+    await tester.ensureVisible(lastChip);
+    await tester.pumpAndSettle();
+    await tester.tap(lastChip);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('new-dm-selected-person-7')), findsNothing);
+    final ninthRecipient = find.byKey(const Key('new-dm-person-person-8'));
+    final listScroll = find
+        .descendant(
+          of: find.byType(BottomSheet).last,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Scrollable &&
+                widget.axisDirection == AxisDirection.down,
+          ),
+        )
+        .last;
+    await tester.scrollUntilVisible(
+      ninthRecipient,
+      100,
+      scrollable: listScroll,
+    );
+    await tester.pumpAndSettle();
+    expect(ninthRecipient.hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
