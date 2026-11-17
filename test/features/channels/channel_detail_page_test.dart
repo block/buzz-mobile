@@ -22064,7 +22064,7 @@ class _RecordingOrdinarySender implements SendMessage {
 
 class _SoloMetadataRelaySession extends RelaySessionNotifier {
   final fixture =
-      jsonDecode(File('../test-fixtures/solo-creation.json').readAsStringSync())
+      jsonDecode(File('test-fixtures/solo-creation.json').readAsStringSync())
           as Map<String, dynamic>;
   String get creator => fixture['creator'] as String;
   @override

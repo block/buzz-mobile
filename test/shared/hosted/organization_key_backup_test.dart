@@ -34,9 +34,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final fixture =
       jsonDecode(
-            File(
-              '../desktop/src-tauri/src/testdata/hpke_nsec_backup_v1.json',
-            ).readAsStringSync(),
+            File('test-fixtures/hpke_nsec_backup_v1.json').readAsStringSync(),
           )
           as Map<String, dynamic>;
   final envelope = Map<String, dynamic>.from(fixture['envelope'] as Map);

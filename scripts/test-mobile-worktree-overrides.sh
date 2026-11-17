@@ -31,7 +31,7 @@ pass() {
 make_repo() {
   # $1: repo dir, $2: initial branch name
   local repo="$1" branch="$2"
-  mkdir -p "$repo/scripts" "$repo/mobile/ios/Flutter" "$repo/mobile/android"
+  mkdir -p "$repo/scripts" "$repo/ios/Flutter" "$repo/android"
   cp "$script" "$repo/scripts/mobile-worktree-overrides.sh"
   git -C "$repo" init -q -b "$branch"
   git -C "$repo" -c user.name=t -c user.email=t@t commit -q --allow-empty -m init
@@ -41,17 +41,17 @@ make_worktree() {
   # $1: source repo, $2: worktree dir, $3: branch to create
   local repo="$1" wt="$2" branch="$3"
   git -C "$repo" worktree add -q -b "$branch" "$wt"
-  mkdir -p "$wt/scripts" "$wt/mobile/ios/Flutter" "$wt/mobile/android"
+  mkdir -p "$wt/scripts" "$wt/ios/Flutter" "$wt/android"
   cp "$script" "$wt/scripts/mobile-worktree-overrides.sh"
 }
 
 # ── Main checkout: no overrides, stale files removed ─────────────────────────
 repo="$tmp/main-checkout"
 make_repo "$repo" main
-echo stale > "$repo/mobile/ios/Flutter/WorktreeOverrides.xcconfig"
-echo stale > "$repo/mobile/android/worktree.properties"
+echo stale > "$repo/ios/Flutter/WorktreeOverrides.xcconfig"
+echo stale > "$repo/android/worktree.properties"
 "$repo/scripts/mobile-worktree-overrides.sh" > /dev/null
-if [[ -e "$repo/mobile/ios/Flutter/WorktreeOverrides.xcconfig" || -e "$repo/mobile/android/worktree.properties" ]]; then
+if [[ -e "$repo/ios/Flutter/WorktreeOverrides.xcconfig" || -e "$repo/android/worktree.properties" ]]; then
   fail "main checkout must remove stale worktree override files"
 else
   pass "main checkout removes stale worktree override files"
@@ -61,8 +61,8 @@ fi
 wt="$tmp/Feature_Work-1"
 make_worktree "$repo" "$wt" "tho/Fix_Thing-2"
 out="$("$wt/scripts/mobile-worktree-overrides.sh")"
-ios="$wt/mobile/ios/Flutter/WorktreeOverrides.xcconfig"
-android="$wt/mobile/android/worktree.properties"
+ios="$wt/ios/Flutter/WorktreeOverrides.xcconfig"
+android="$wt/android/worktree.properties"
 [[ -f "$ios" && -f "$android" ]] || fail "worktree must write both override files"
 grep -q '^BUNDLE_IDENTIFIER = xyz\.block\.buzz\.dev\.mobile\.feature-work-1$' "$ios" \
   && pass "iOS bundle identifier keys to the sanitized worktree directory name" \
@@ -119,9 +119,9 @@ grep -q '^applicationIdSuffix=\.feature_work_1$' "$android" \
 wt2="$tmp/2fast"
 make_worktree "$repo" "$wt2" "some-branch"
 "$wt2/scripts/mobile-worktree-overrides.sh" > /dev/null
-grep -q '^applicationIdSuffix=\.w_2fast$' "$wt2/mobile/android/worktree.properties" \
+grep -q '^applicationIdSuffix=\.w_2fast$' "$wt2/android/worktree.properties" \
   && pass "digit-leading worktree dir yields a valid Android package segment" \
-  || fail "digit-leading dir segment wrong: $(cat "$wt2/mobile/android/worktree.properties")"
+  || fail "digit-leading dir segment wrong: $(cat "$wt2/android/worktree.properties")"
 
 # ── Explicit Android debug identity: readable and isolated ───────────────────
 BUZZ_ANDROID_DEBUG_APP_NAME="Buzz Huddles" \
@@ -150,11 +150,11 @@ else
 fi
 
 # ── Tracked build files: overrides are debug-only, release stays production ──
-debug_xcconfig="$repo_root/mobile/ios/Flutter/Debug.xcconfig"
-release_xcconfig="$repo_root/mobile/ios/Flutter/Release.xcconfig"
-gradle="$repo_root/mobile/android/app/build.gradle.kts"
-manifest="$repo_root/mobile/android/app/src/main/AndroidManifest.xml"
-plist="$repo_root/mobile/ios/Runner/Info.plist"
+debug_xcconfig="$repo_root/ios/Flutter/Debug.xcconfig"
+release_xcconfig="$repo_root/ios/Flutter/Release.xcconfig"
+gradle="$repo_root/android/app/build.gradle.kts"
+manifest="$repo_root/android/app/src/main/AndroidManifest.xml"
+plist="$repo_root/ios/Runner/Info.plist"
 
 grep -q '^BUNDLE_IDENTIFIER = xyz\.block\.buzz\.dev\.mobile$' "$debug_xcconfig" \
   && pass "Debug.xcconfig defaults to the development bundle identifier" \
@@ -232,15 +232,15 @@ printf '%s\n' "$release_block" | grep -Eq 'worktree|debugAppName|debugIdSuffix' 
   && fail "release build type must not reference debug identity overrides" \
   || pass "release build type does not reference debug identity overrides"
 
-git -C "$repo_root" check-ignore -q mobile/ios/Flutter/WorktreeOverrides.xcconfig \
+git -C "$repo_root" check-ignore -q ios/Flutter/WorktreeOverrides.xcconfig \
   && pass "iOS override file is gitignored" \
-  || fail "mobile/ios/Flutter/WorktreeOverrides.xcconfig must be gitignored"
-git -C "$repo_root" check-ignore -q mobile/android/worktree.properties \
+  || fail "ios/Flutter/WorktreeOverrides.xcconfig must be gitignored"
+git -C "$repo_root" check-ignore -q android/worktree.properties \
   && pass "Android override file is gitignored" \
-  || fail "mobile/android/worktree.properties must be gitignored"
-git -C "$repo_root" check-ignore -q mobile/android/AppOverrides.properties \
+  || fail "android/worktree.properties must be gitignored"
+git -C "$repo_root" check-ignore -q android/AppOverrides.properties \
   && pass "Android developer override file is gitignored" \
-  || fail "mobile/android/AppOverrides.properties must be gitignored"
+  || fail "android/AppOverrides.properties must be gitignored"
 grep -Eq '^\s+\./scripts/mobile-worktree-overrides\.sh$' "$repo_root/Justfile" \
   && pass "just mobile-dev applies the worktree identity" \
   || fail "Justfile mobile-dev must run scripts/mobile-worktree-overrides.sh"

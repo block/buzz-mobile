@@ -61,7 +61,7 @@ void main() {
     final contract =
         jsonDecode(
               File(
-                '../test-fixtures/community-theme-accents.json',
+                'test-fixtures/community-theme-accents.json',
               ).readAsStringSync(),
             )
             as Map<String, dynamic>;

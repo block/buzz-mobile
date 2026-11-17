@@ -17,7 +17,7 @@ import 'package:buzz/shared/relay/read_state_snapshot.dart';
 void main() {
   final corpus =
       jsonDecode(
-            File('../test-fixtures/read-state-vectors.json').readAsStringSync(),
+            File('test-fixtures/read-state-vectors.json').readAsStringSync(),
           )
           as Map<String, dynamic>;
   Map<String, int> map(dynamic value) => Map<String, int>.from(value as Map);

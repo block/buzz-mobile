@@ -11,7 +11,7 @@ set -euo pipefail
 index=$1
 total=$2
 shift 2
-cd "$(dirname "$0")/../mobile"
+cd "$(dirname "$0")/.."
 
 files=()
 while IFS= read -r file; do
