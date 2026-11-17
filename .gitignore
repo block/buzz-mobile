@@ -46,3 +46,9 @@ app.*.map.json
 
 # Local environment config (contains keys)
 .env.json
+
+# Hermit (toolchain manager cache)
+.hermit/
+
+# lefthook-generated hook scripts (machine-specific)
+.hooks/

@@ -273,7 +273,7 @@ final class BuzzPushNotificationResolverTests: XCTestCase {
     }
     let url = URL(fileURLWithPath: #filePath)
       .deletingLastPathComponent()
-      .appendingPathComponent("../../../../../test-fixtures/notification-body.json")
+      .appendingPathComponent("../../../../test-fixtures/notification-body.json")
       .standardizedFileURL
     let fixture = try JSONDecoder().decode(Fixture.self, from: Data(contentsOf: url))
 

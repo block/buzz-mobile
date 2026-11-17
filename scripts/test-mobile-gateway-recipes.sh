@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root=$(cd "$(dirname "$0")/.." && pwd)
 fixture=$(mktemp -d)
 trap 'rm -rf "$fixture"' EXIT
-mkdir -p "$fixture/bin" "$fixture/scripts" "$fixture/mobile/ios/Flutter"
+mkdir -p "$fixture/bin" "$fixture/scripts" "$fixture/ios/Flutter"
 for recipe in mobile-dev mobile-build-android; do
   # Render with the real task runner before installing stubs: a Hermit just
   # shim can otherwise prepend the real Flutter to PATH ahead of our stub.
@@ -66,7 +66,7 @@ for recipe in mobile-dev mobile-build-android; do
 done
 
 unset BUZZ_PUSH_GATEWAY_URL
-printf '%s\n' 'BUZZ_PUSH_GATEWAY_URL = https:/$()/push.example' > "$fixture/mobile/ios/Flutter/AppOverrides.xcconfig"
+printf '%s\n' 'BUZZ_PUSH_GATEWAY_URL = https:/$()/push.example' > "$fixture/ios/Flutter/AppOverrides.xcconfig"
 (cd "$fixture" && /bin/bash "$fixture/mobile-dev")
 printf '%s\n' run '--dart-define=BUZZ_PUSH_GATEWAY_URL=https://push.example' > "$fixture/expected"
 diff -u "$fixture/expected" "$CALL_LOG"

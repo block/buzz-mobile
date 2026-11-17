@@ -5,7 +5,7 @@ repo_root=$(cd "$(dirname "$0")/.." && pwd)
 fixture=$(mktemp -d)
 trap 'rm -r "$fixture"' EXIT
 xcrun swiftc \
-  "$repo_root/mobile/ios/Runner/ThemePaginationGeometry.swift" \
-  "$repo_root/mobile/ios/NativeControlTests/ThemePaginationGeometryTests.swift" \
+  "$repo_root/ios/Runner/ThemePaginationGeometry.swift" \
+  "$repo_root/ios/NativeControlTests/ThemePaginationGeometryTests.swift" \
   -o "$fixture/pagination-tests"
 "$fixture/pagination-tests"

@@ -26,8 +26,8 @@ set -euo pipefail
 unset GIT_DIR GIT_WORK_TREE
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ios_overrides="$repo_root/mobile/ios/Flutter/WorktreeOverrides.xcconfig"
-android_props="$repo_root/mobile/android/worktree.properties"
+ios_overrides="$repo_root/ios/Flutter/WorktreeOverrides.xcconfig"
+android_props="$repo_root/android/worktree.properties"
 
 # Worktree detection: in the main working tree --git-dir and --git-common-dir
 # are identical; in any linked worktree they differ (same check as
