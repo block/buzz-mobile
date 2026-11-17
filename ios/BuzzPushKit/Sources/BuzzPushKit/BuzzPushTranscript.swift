@@ -25,7 +25,7 @@ public enum BuzzPushTranscriptError: Error, Equatable {
 /// hand-rolled for that reason: `JSONSerialization` escapes `/` as `\/` and
 /// does not guarantee member order, so it must never be used for transcripts.
 ///
-/// Ground truth: `crates/buzz-push-gateway/tests/vectors/app_attest_transcripts.json`,
+/// Ground truth: block/buzz `crates/buzz-push-gateway/tests/vectors/app_attest_transcripts.json`,
 /// generated and asserted by the gateway's own encoder. The tests in this
 /// package replay those vectors byte-for-byte.
 ///

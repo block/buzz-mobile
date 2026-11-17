@@ -5,7 +5,8 @@ import XCTest
 @testable import BuzzPushKit
 
 /// Replays the gateway-generated known-answer vectors
-/// (`crates/buzz-push-gateway/tests/vectors/app_attest_transcripts.json`)
+/// (block/buzz `crates/buzz-push-gateway/tests/vectors/app_attest_transcripts.json`,
+/// copied here as `Fixtures/app_attest_transcripts.json`)
 /// against the Swift canonical encoder. Byte-for-byte transcript equality and
 /// SHA-256 equality are both asserted, so a drift on either side breaks a test
 /// instead of silently stranding iOS clients with `401 invalid_attestation`.
