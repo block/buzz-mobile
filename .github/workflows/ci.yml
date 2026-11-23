@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  merge_group:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
@@ -243,3 +244,56 @@ jobs:
           /bin/bash scripts/test-mobile-gateway-recipes.sh
           flutter build ios --release --no-codesign --no-pub
 
+
+  # Required alongside Mobile. It replaces the DCO app's check of the same name,
+  # which only reports on pull requests and so never passes in the merge queue.
+  dco:
+    name: DCO Check
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Skip outside pull requests
+        if: github.event_name != 'pull_request'
+        run: echo "Commits were checked on their pull request."
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        if: github.event_name == 'pull_request'
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check every commit is signed off by its author
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          failed=0
+          for sha in $(git rev-list --no-merges "$BASE_SHA..$HEAD_SHA"); do
+            email=$(git log -1 --format=%ae "$sha")
+            if ! git log -1 --format='%(trailers:key=Signed-off-by,valueonly)' "$sha" \
+              | grep -qiF -- "<$email>"; then
+              echo "::error::Commit $(git log -1 --format=%h "$sha") has no Signed-off-by for its author, $email."
+              failed=1
+            fi
+          done
+          if [ "$failed" -ne 0 ]; then
+            echo "Sign off each commit: git rebase --signoff $BASE_SHA && git push --force-with-lease"
+            exit 1
+          fi
+
+  # The single required check for main and the stable branches.
+  mobile-result:
+    name: Mobile
+    if: always()
+    needs: [mobile, mobile-swift]
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Check Mobile result
+        env:
+          MOBILE_RESULT: ${{ needs.mobile.result }}
+          SWIFT_RESULT: ${{ needs.mobile-swift.result }}
+        run: test "$MOBILE_RESULT" = success && test "$SWIFT_RESULT" = success
