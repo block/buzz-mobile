@@ -3,11 +3,7 @@
 # Tag ruleset ("Restrict Mobile Tags") that protects mobile candidate tags. Its
 # bypass actors are the mobile release managers, never the buzz-release-bot App:
 # operators push candidate tags themselves.
-readonly MOBILE_RELEASE_TAG_RULESET_ID=26588677
-# General tag ruleset ("Release", ~ALL tags) whose only bypass actor is the
-# App. Rulesets stack, so it must exclude mobile tags or operators can't push
-# them even though they bypass the mobile tag ruleset.
-readonly GENERAL_RELEASE_TAG_RULESET_ID=14378754
+readonly MOBILE_RELEASE_TAG_RULESET_ID=27927752
 
 fail_release_ruleset() {
   echo "Error: $*" >&2
@@ -18,12 +14,12 @@ require_canonical_repository() {
   local origin_url
 
   origin_url="$(git config --get remote.origin.url 2>/dev/null)" || \
-    fail_release_ruleset "origin is required and must point to block/buzz" || return 1
+    fail_release_ruleset "origin is required and must point to block/buzz-mobile" || return 1
   case "$origin_url" in
-    git@github.com:block/buzz.git|ssh://git@github.com/block/buzz.git|https://github.com/block/buzz.git|https://github.com/block/buzz)
+    git@github.com:block/buzz-mobile.git|ssh://git@github.com/block/buzz-mobile.git|https://github.com/block/buzz-mobile.git|https://github.com/block/buzz-mobile)
       ;;
     *)
-      fail_release_ruleset "origin must point to canonical block/buzz, not '$origin_url'" || return 1
+      fail_release_ruleset "origin must point to canonical block/buzz-mobile, not '$origin_url'" || return 1
       ;;
   esac
   # Tags are pushed with `git push origin`, which honors remote.origin.pushurl
@@ -31,7 +27,7 @@ require_canonical_repository() {
   # the same canonical repository that origin fetches from.
   # --all: git push sends to every configured push URL, not just the first.
   [[ "$(git remote get-url --push --all origin)" == "$(git remote get-url origin)" ]] || \
-    fail_release_ruleset "origin pushes somewhere other than it fetches from; remove remote.origin.pushurl or pushInsteadOf so candidate tags reach canonical block/buzz" || return 1
+    fail_release_ruleset "origin pushes somewhere other than it fetches from; remove remote.origin.pushurl or pushInsteadOf so candidate tags reach canonical block/buzz-mobile" || return 1
 }
 
 require_mobile_release_tag_ruleset() {
@@ -40,7 +36,7 @@ require_mobile_release_tag_ruleset() {
   [[ "$MOBILE_RELEASE_TAG_RULESET_ID" =~ ^[0-9]+$ ]] || \
     fail_release_ruleset "MOBILE_RELEASE_TAG_RULESET_ID in scripts/release-rulesets.sh must be numeric (got '$MOBILE_RELEASE_TAG_RULESET_ID')" || return 1
   command -v gh >/dev/null 2>&1 || fail_release_ruleset "gh is required" || return 1
-  ruleset_endpoint="repos/block/buzz/rulesets/$MOBILE_RELEASE_TAG_RULESET_ID"
+  ruleset_endpoint="repos/block/buzz-mobile/rulesets/$MOBILE_RELEASE_TAG_RULESET_ID"
 
   state="$(gh api "$ruleset_endpoint" --jq .enforcement)" || \
     fail_release_ruleset "could not verify mobile tag ruleset $MOBILE_RELEASE_TAG_RULESET_ID" || return 1
@@ -74,9 +70,4 @@ require_mobile_release_tag_ruleset() {
     fail_release_ruleset "could not verify mobile tag ruleset $MOBILE_RELEASE_TAG_RULESET_ID exclusions" || return 1
   [[ -z "$excludes" ]] || \
     fail_release_ruleset "mobile tag ruleset $MOBILE_RELEASE_TAG_RULESET_ID has unexpected exclusions: '$excludes'" || return 1
-
-  excludes="$(gh api "repos/block/buzz/rulesets/$GENERAL_RELEASE_TAG_RULESET_ID" --jq '[.conditions.ref_name.exclude[]] | join(",")')" || \
-    fail_release_ruleset "could not verify general tag ruleset $GENERAL_RELEASE_TAG_RULESET_ID exclusions" || return 1
-  [[ ",$excludes," == *",refs/tags/mobile-*,"* ]] || \
-    fail_release_ruleset "general tag ruleset $GENERAL_RELEASE_TAG_RULESET_ID must exclude refs/tags/mobile-*, or it rejects your candidate tag push; ask a repository admin" || return 1
 }
