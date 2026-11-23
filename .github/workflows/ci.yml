@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  merge_group:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
@@ -240,3 +241,18 @@ jobs:
           /bin/bash scripts/test-mobile-gateway-recipes.sh
           flutter build ios --release --no-codesign --no-pub
 
+
+  # The single required check for main and the stable branches.
+  mobile-result:
+    name: Mobile
+    if: always()
+    needs: [mobile, mobile-swift]
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Check Mobile result
+        env:
+          MOBILE_RESULT: ${{ needs.mobile.result }}
+          SWIFT_RESULT: ${{ needs.mobile-swift.result }}
+        run: test "$MOBILE_RESULT" = success && test "$SWIFT_RESULT" = success
