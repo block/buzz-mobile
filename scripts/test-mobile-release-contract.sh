@@ -8,8 +8,8 @@ trap 'rm -rf "$tmp"' EXIT
 # is exercised unchanged. Keep the line so the numeric-guard case below can
 # rewrite it in a copy.
 id_line='readonly MOBILE_RELEASE_TAG_RULESET_ID='
-grep -Eq "^${id_line}26588677\$" "$repo_root/scripts/release-rulesets.sh" || {
-  echo "release-rulesets.sh must define MOBILE_RELEASE_TAG_RULESET_ID=26588677" >&2
+grep -Eq "^${id_line}27927752\$" "$repo_root/scripts/release-rulesets.sh" || {
+  echo "release-rulesets.sh must define MOBILE_RELEASE_TAG_RULESET_ID=27927752" >&2
   exit 1
 }
 mkdir -p "$tmp/scripts"
@@ -20,7 +20,7 @@ remote="$tmp/remote.git"
 work="$tmp/work"
 operator="$tmp/operator"
 bin="$tmp/bin"
-canonical_origin="git@github.com:block/buzz.git"
+canonical_origin="git@github.com:block/buzz-mobile.git"
 mkdir -p "$bin"
 
 cat > "$bin/gh" <<'GH'
@@ -28,12 +28,12 @@ cat > "$bin/gh" <<'GH'
 set -euo pipefail
 case "${1:-}:${2:-}" in
   --version:*) printf 'gh version %s (test)\n' "${GH_VERSION:-2.94.0}" ;;
-  api:repos/block/buzz/rulesets/19321162)
+  api:repos/block/buzz-mobile/rulesets/27927750)
     [[ "${GH_BRANCH_POLICY_FAIL:-}" != 1 ]] || exit 1
     policy='{"target":"branch","enforcement":"active","current_user_can_bypass":"always","conditions":{"ref_name":{"include":["refs/heads/mobile-v*"],"exclude":[]}},"bypass_actors":[{"actor_type":"User","bypass_mode":"always"}],"rules":[{"type":"creation"},{"type":"update"},{"type":"deletion"},{"type":"non_fast_forward"},{"type":"pull_request","parameters":{"required_approving_review_count":1,"dismiss_stale_reviews_on_push":true,"require_last_push_approval":true,"required_review_thread_resolution":true}},{"type":"required_status_checks","parameters":{"strict_required_status_checks_policy":true,"required_status_checks":[{"context":"Mobile"},{"context":"DCO Check"}]}}]}'
     printf '%s\n' "${GH_BRANCH_POLICY:-$policy}" | jq -r "$4"
     ;;
-  api:repos/block/buzz/rulesets/26588677)
+  api:repos/block/buzz-mobile/rulesets/27927752)
     case "$*" in
       *'.enforcement'*) printf '%s\n' "${GH_TAG_RULESET_STATE:-active}" ;;
       *'.target'*) printf '%s\n' "${GH_TAG_RULESET_TARGET:-tag}" ;;
@@ -44,14 +44,11 @@ case "${1:-}:${2:-}" in
       *) exit 2 ;;
     esac
     ;;
-  api:repos/block/buzz/rulesets/14378754)
-    printf '%s\n' "${GH_GENERAL_TAG_EXCLUDES-refs/tags/mobile-*}"
-    ;;
-  api:repos/block/buzz/git/ref/tags/*)
+  api:repos/block/buzz-mobile/git/ref/tags/*)
     [[ "${GH_TAG_REF_FAIL:-}" != 1 ]] || exit 1
-    git --git-dir="$GH_REMOTE" rev-parse --verify --quiet "refs/tags/${2#repos/block/buzz/git/ref/tags/}" || exit 1
+    git --git-dir="$GH_REMOTE" rev-parse --verify --quiet "refs/tags/${2#repos/block/buzz-mobile/git/ref/tags/}" || exit 1
     ;;
-  api:repos/block/buzz/compare/*)
+  api:repos/block/buzz-mobile/compare/*)
     [[ "${GH_COMPARE_FAIL:-}" != 1 ]] || exit 1
     pair="${2##*/}"
     git --git-dir="$GH_REMOTE" merge-base "${pair%%...*}" "${pair##*...}"
@@ -233,7 +230,7 @@ assert_no_candidate_tag() {
 if GH_CURRENT_USER_CAN_BYPASS=never run_release "$operator" candidate 9.9.7 > "$tmp/no-bypass-output" 2>&1; then
   fail "candidate succeeded without bypass of the mobile tag ruleset"
 fi
-grep -Fq 'bypass actor of mobile tag ruleset 26588677' "$tmp/no-bypass-output"
+grep -Fq 'bypass actor of mobile tag ruleset 27927752' "$tmp/no-bypass-output"
 assert_no_candidate_tag 9.9.7
 if GH_CURRENT_USER_CAN_BYPASS='' run_release "$operator" candidate 9.9.7 >/dev/null 2>&1; then
   fail "candidate succeeded with an empty bypass report"
@@ -256,13 +253,6 @@ fi
 if GH_TAG_EXCLUDES='refs/tags/mobile-v9*' run_release "$operator" candidate 9.9.7 >/dev/null 2>&1; then
   fail "candidate succeeded with a ruleset that excludes mobile tags"
 fi
-assert_no_candidate_tag 9.9.7
-# The App-only general tag ruleset must exclude mobile tags, or the operator's
-# push would be rejected.
-if GH_GENERAL_TAG_EXCLUDES='' run_release "$operator" candidate 9.9.7 > "$tmp/general-output" 2>&1; then
-  fail "candidate succeeded while the general tag ruleset still covers mobile tags"
-fi
-grep -Fq 'general tag ruleset 14378754 must exclude refs/tags/mobile-*' "$tmp/general-output"
 assert_no_candidate_tag 9.9.7
 
 # The narrower refs/tags/mobile-v* include also covers candidate tags.
@@ -293,7 +283,7 @@ chmod +x "$remote/hooks/pre-receive"
 if run_release "$operator" candidate 9.9.6 > "$tmp/push-rejected-output" 2>&1; then
   fail "candidate succeeded despite a rejected tag push"
 fi
-grep -Fq 'bypass actor of mobile tag ruleset 26588677' "$tmp/push-rejected-output"
+grep -Fq 'bypass actor of mobile tag ruleset 27927752' "$tmp/push-rejected-output"
 assert_no_candidate_tag 9.9.6
 rm "$remote/hooks/pre-receive"
 # The retry after the rejection is clean and gets the same candidate number.
@@ -369,7 +359,7 @@ if (cd "$operator" && "$script" candidate 2.0.1 > "$tmp/insteadof-output" 2>&1);
   fail "candidate reported success after publishing into a fork"
 fi
 git -C "$operator" config --unset "url.file://$fork_remote.insteadOf"
-grep -Fq 'could not confirm mobile-v2.0.1-rc.1 on canonical block/buzz' "$tmp/insteadof-output"
+grep -Fq 'could not confirm mobile-v2.0.1-rc.1 on canonical block/buzz-mobile' "$tmp/insteadof-output"
 [[ "$(git -C "$operator" cat-file -t refs/tags/mobile-v2.0.1-rc.1)" == tag ]] || \
   fail "the local tag was not kept after an unconfirmed publication"
 git -C "$operator" tag -d mobile-v2.0.1-rc.1 >/dev/null
@@ -379,7 +369,7 @@ assert_no_candidate_tag 2.0.1
 if GH_TAG_REF_FAIL=1 run_release "$operator" candidate 2.0.2 > "$tmp/api-down-output" 2>&1; then
   fail "candidate reported success without GitHub confirmation"
 fi
-grep -Fq 'could not confirm mobile-v2.0.2-rc.1 on canonical block/buzz' "$tmp/api-down-output"
+grep -Fq 'could not confirm mobile-v2.0.2-rc.1 on canonical block/buzz-mobile' "$tmp/api-down-output"
 [[ "$(git -C "$operator" cat-file -t refs/tags/mobile-v2.0.2-rc.1)" == tag ]] || \
   fail "the local tag was deleted while GitHub was unavailable"
 [[ "$(git --git-dir="$remote" cat-file -t refs/tags/mobile-v2.0.2-rc.1)" == tag ]]
@@ -421,7 +411,7 @@ if (cd "$operator" && GIT_PUSH_LANDS_BUT_FAILS=1 "$script" candidate 2.0.5 > "$t
   fail "an ambiguous push into a fork was reported as published"
 fi
 git -C "$operator" config --unset "url.file://$fork_remote.insteadOf"
-grep -Fq 'could not confirm mobile-v2.0.5-rc.1 on canonical block/buzz' "$tmp/landed-fork-output"
+grep -Fq 'could not confirm mobile-v2.0.5-rc.1 on canonical block/buzz-mobile' "$tmp/landed-fork-output"
 git -C "$operator" tag -d mobile-v2.0.5-rc.1 >/dev/null
 assert_no_candidate_tag 2.0.5
 

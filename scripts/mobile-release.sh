@@ -186,21 +186,21 @@ case "$command" in
         fail "could not push $tag; you must be a bypass actor of mobile tag ruleset $MOBILE_RELEASE_TAG_RULESET_ID (currently the mobile release managers). The local tag was removed so a retry starts clean"
       fi
       # origin has the tag, but origin may be rewritten to a fork; the checks
-      # below decide whether canonical block/buzz has exactly this candidate.
-      echo "Note: push of $tag reported failure, but origin has $tag; verifying it on canonical block/buzz." >&2
+      # below decide whether canonical block/buzz-mobile has exactly this candidate.
+      echo "Note: push of $tag reported failure, but origin has $tag; verifying it on canonical block/buzz-mobile." >&2
     fi
 
     # git URL rewriting (insteadOf) can send even a canonical-looking origin
-    # to a fork, so confirm with GitHub itself that block/buzz now has this
+    # to a fork, so confirm with GitHub itself that block/buzz-mobile now has this
     # exact annotated tag object. An unavailable API and a mismatch both stop
     # here without deleting the local tag.
     local_tag_oid="$(git rev-parse --verify "refs/tags/$tag")" || fail "local tag $tag disappeared"
-    if ! canonical_tag_oid="$(gh api "repos/block/buzz/git/ref/tags/$tag" --jq .object.sha)" || \
+    if ! canonical_tag_oid="$(gh api "repos/block/buzz-mobile/git/ref/tags/$tag" --jq .object.sha)" || \
         [[ "$canonical_tag_oid" != "$local_tag_oid" ]]; then
       # Numbering reads only remote tags, so keeping the local tag doesn't
       # change the next candidate number. It records what was attempted, and
       # after a fork rewrite is fixed it must be deleted before rerunning.
-      fail "could not confirm $tag on canonical block/buzz. If GitHub shows $tag, use it and don't rerun. If it doesn't, fix any git url.*.insteadOf rewrite for origin and run 'git tag -d $tag' before retrying"
+      fail "could not confirm $tag on canonical block/buzz-mobile. If GitHub shows $tag, use it and don't rerun. If it doesn't, fix any git url.*.insteadOf rewrite for origin and run 'git tag -d $tag' before retrying"
     fi
     published_sha="$(remote_tag_commit_sha "refs/tags/$tag")" || \
       fail "push completed without exact annotated candidate tag $tag on origin"

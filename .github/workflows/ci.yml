@@ -131,6 +131,9 @@ jobs:
       - name: Test mobile recipe argument forwarding
         if: matrix.lane == 'checks'
         run: /bin/bash scripts/test-mobile-gateway-recipes.sh
+      - name: Mobile release contract
+        if: matrix.lane == 'checks'
+        run: /bin/bash scripts/test-mobile-release-contract.sh
       # ubuntu-26.04 defaults to JDK 25, which Gradle 8.14 does not
       # support. Pin the JDK 17 the 24.04 image used.
       - name: Set up JDK 17

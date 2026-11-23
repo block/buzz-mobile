@@ -20,7 +20,7 @@ require_mobile_release_source() {
 require_mobile_release_branch_ruleset() {
   local branch="$1" valid
   [[ "$branch" != main ]] || return 0
-  valid="$(gh api repos/block/buzz/rulesets/19321162 --jq '
+  valid="$(gh api repos/block/buzz-mobile/rulesets/27927750 --jq '
     .target == "branch" and .enforcement == "active"
     and (.conditions.ref_name.include | index("refs/heads/mobile-v*") != null)
     and (.conditions.ref_name.exclude == [])
@@ -37,7 +37,7 @@ require_mobile_release_branch_ruleset() {
       and ([.parameters.required_status_checks[].context] | index("DCO Check") != null))
   ')" || { echo "Could not verify mobile stable-branch protection" >&2; return 1; }
   [[ "$valid" == true ]] || {
-    echo "Mobile stable-branch ruleset 19321162 must enforce review and checks on mobile-v*" >&2
+    echo "Mobile stable-branch ruleset 27927750 must enforce review and checks on mobile-v*" >&2
     return 1
   }
 }
@@ -46,7 +46,7 @@ require_mobile_release_branch_ruleset() {
 # advance after this snapshot without changing the authorized candidate source.
 require_mobile_release_commit_ancestor() {
   local target_sha="$1" source_sha="$2" merge_base
-  merge_base="$(gh api "repos/block/buzz/compare/$target_sha...$source_sha" --jq .merge_base_commit.sha)" || {
+  merge_base="$(gh api "repos/block/buzz-mobile/compare/$target_sha...$source_sha" --jq .merge_base_commit.sha)" || {
     echo "Could not verify candidate source ancestry" >&2
     return 1
   }
