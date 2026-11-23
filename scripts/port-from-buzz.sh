@@ -164,7 +164,7 @@ EOF
   previous=$(git -C "$repo_root" symbolic-ref --quiet --short HEAD || git -C "$repo_root" rev-parse HEAD)
   echo "Rebasing $(git -C "$repo_root" rev-list --count --no-merges "refs/port-from-buzz/base..refs/heads/$branch") commit(s) onto $onto..."
   local rebased=0
-  git -C "$repo_root" rebase --quiet --onto "$onto_commit" refs/port-from-buzz/base "refs/heads/$branch" && rebased=1
+  git -C "$repo_root" rebase --quiet --onto "$onto_commit" refs/port-from-buzz/base "$branch" && rebased=1
   git -C "$repo_root" update-ref -d refs/port-from-buzz/base
   if [[ "$rebased" == 0 ]]; then
     cat >&2 <<EOF
