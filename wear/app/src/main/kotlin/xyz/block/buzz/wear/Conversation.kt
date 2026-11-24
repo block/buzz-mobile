@@ -2,7 +2,6 @@ package xyz.block.buzz.wear
 
 import android.graphics.BitmapFactory
 import android.util.LruCache
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.State
@@ -31,26 +30,21 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -65,15 +59,12 @@ import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.Colors
-import androidx.wear.compose.material.LocalContentColor
-import androidx.wear.compose.material.CompactChip
 import androidx.wear.compose.material.ChipDefaults
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
-import androidx.wear.compose.material.scrollAway
 import androidx.wear.compose.material.Vignette
 import androidx.wear.compose.material.VignettePosition
 
@@ -205,12 +196,7 @@ internal fun Conversation(
                 Brush.verticalGradient(0f to Color.Transparent, 0.3f to MaterialTheme.colors.background),
             ),
         ) {
-            Button(
-                onClick = onSpeak,
-                enabled = enabled,
-                colors = ButtonDefaults.primaryButtonColors(),
-                modifier = Modifier.size(48.dp).semantics { contentDescription = "Speak a message" },
-            ) { MicGlyph(LocalContentColor.current) }
+            IconAction(BuzzIcon.Mic, "Write a message", onSpeak, primary = true, enabled = enabled, size = 48.dp)
         }
     }
 }
@@ -246,28 +232,22 @@ private fun AgentPill(agent: String, picture: String?, media: MediaFetcher?, can
         ) {
             Avatar(picture, media, 22.dp)
             Text(
-                text = if (canChange) "$agent ▾" else agent,
+                text = agent,
                 style = MaterialTheme.typography.caption2,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colors.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(start = 2.dp),
+                modifier = Modifier.weight(1f, fill = false).padding(start = 2.dp),
             )
+            if (canChange) Glyph(BuzzIcon.ChevronDown, size = 12.dp, color = MaterialTheme.colors.onSurface)
         }
     }
 }
 
 /** A way back that does not depend on knowing the swipe gesture. */
 @Composable
-private fun BackChip(label: String, onBack: () -> Unit) = CompactChip(
-    label = { Text(label) },
-    onClick = onBack,
-    colors = ChipDefaults.chipColors(
-        backgroundColor = MaterialTheme.colors.surface,
-        contentColor = MaterialTheme.colors.onSurface,
-    ),
-)
+private fun BackButton(onBack: () -> Unit) = IconAction(BuzzIcon.Back, "Back", onBack)
 
 /** The bottom of an input screen: its actions, centred where a round screen is widest. */
 @Composable
@@ -297,23 +277,11 @@ internal fun ComposeChoice(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxSize(),
         ) {
-            Button(
-                onClick = onEmoji,
-                colors = ButtonDefaults.secondaryButtonColors(),
-                modifier = Modifier.size(52.dp).semantics { contentDescription = "Emoji" },
-            ) { Text("☺", style = MaterialTheme.typography.title1) }
-            Button(
-                onClick = onMic,
-                colors = ButtonDefaults.primaryButtonColors(),
-                modifier = Modifier.size(60.dp).semantics { contentDescription = "Speak" },
-            ) { MicGlyph(LocalContentColor.current) }
-            Button(
-                onClick = onKeyboard,
-                colors = ButtonDefaults.secondaryButtonColors(),
-                modifier = Modifier.size(52.dp).semantics { contentDescription = "Keyboard" },
-            ) { Text("⌨", style = MaterialTheme.typography.title1) }
+            IconAction(BuzzIcon.Smile, "Emoji", onEmoji, size = 52.dp)
+            IconAction(BuzzIcon.Mic, "Speak", onMic, primary = true, size = 60.dp)
+            IconAction(BuzzIcon.Keyboard, "Keyboard", onKeyboard, size = 52.dp)
         }
-        BottomActions { BackChip("Back", onBack) }
+        BottomActions { BackButton(onBack) }
     }
 }
 
@@ -349,25 +317,21 @@ internal fun Listen(
         BottomActions {
             when (state) {
                 ListenState.Heard -> {
-                    BackChip("Cancel", onBack)
+                    IconAction(BuzzIcon.Close, "Cancel", onBack)
                     SendButton(onSend)
                 }
                 ListenState.Missed -> {
-                    BackChip("Back", onBack)
-                    BackChip("Try again", onRetry)
+                    BackButton(onBack)
+                    IconAction(BuzzIcon.Retry, "Try again", onRetry, primary = true)
                 }
-                ListenState.Listening -> BackChip("Cancel", onBack)
+                ListenState.Listening -> IconAction(BuzzIcon.Close, "Cancel", onBack)
             }
         }
     }
 }
 
 @Composable
-private fun SendButton(onSend: () -> Unit) = Button(
-    onClick = onSend,
-    colors = ButtonDefaults.primaryButtonColors(),
-    modifier = Modifier.size(48.dp).semantics { contentDescription = "Send" },
-) { Text("✓", style = MaterialTheme.typography.title2, fontWeight = FontWeight.Bold) }
+private fun SendButton(onSend: () -> Unit) = IconAction(BuzzIcon.Check, "Send", onSend, primary = true)
 
 /** Typing a message: the watch keyboard opens at once, then one button to confirm. */
 @Composable
@@ -410,7 +374,8 @@ internal fun Type(
             )
         }
         BottomActions {
-            BackChip(if (text.isBlank()) "Back" else "Cancel", onBack)
+            // A cross here could read as "clear what I typed", so this stays a chevron.
+            BackButton(onBack)
             if (text.isNotBlank()) SendButton { onSend(text) }
         }
     }
@@ -438,7 +403,7 @@ internal fun EmojiChoice(onPick: (String) -> Unit, onBack: () -> Unit) {
                     }
                 }
             }
-            item { BackChip("Back", onBack) }
+            item { BackButton(onBack) }
         }
     }
 }
@@ -477,41 +442,9 @@ internal fun Picker(
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
-            item {
-                CompactChip(
-                    label = { Text("Back") },
-                    onClick = onBack,
-                    colors = ChipDefaults.chipColors(
-                        backgroundColor = MaterialTheme.colors.surface,
-                        contentColor = MaterialTheme.colors.onSurface,
-                    ),
-                )
-            }
+            item { BackButton(onBack) }
         }
     }
-}
-
-/** A microphone drawn in place, to avoid an icon library for one glyph. */
-@Composable
-private fun MicGlyph(color: Color) = Canvas(Modifier.size(20.dp)) {
-    val w = size.width
-    val stroke = w * 0.09f
-    drawRoundRect(
-        color = color,
-        topLeft = Offset(w * 0.37f, w * 0.08f),
-        size = Size(w * 0.26f, w * 0.5f),
-        cornerRadius = CornerRadius(w * 0.13f),
-    )
-    drawArc(
-        color = color,
-        startAngle = 0f,
-        sweepAngle = 180f,
-        useCenter = false,
-        topLeft = Offset(w * 0.22f, w * 0.2f),
-        size = Size(w * 0.56f, w * 0.52f),
-        style = Stroke(stroke, cap = StrokeCap.Round),
-    )
-    drawLine(color, Offset(w * 0.5f, w * 0.72f), Offset(w * 0.5f, w * 0.9f), stroke, StrokeCap.Round)
 }
 
 @Composable

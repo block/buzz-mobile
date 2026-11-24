@@ -44,3 +44,19 @@ watch build with `-PidSuffix=.<suffix>`.
   is reopened).
 - Unpairing, and refusing to pair a watch that has no screen lock.
 - Threads, reactions, sending media and video playback.
+
+## Icons
+
+The watch draws the same Tabler icons as the phone app. `app/src/main/res/font/tabler_icons.ttf`
+holds only the glyphs listed in `Icons.kt`, cut from the phone's `assets/fonts/TablerIcons.ttf`
+(MIT, see `app/TABLER_ICONS_LICENSE.txt`). To add an icon, add its code point to `Icons.kt` and
+to this command, then run it from `wear/`:
+
+```sh
+python3 -m venv /tmp/buzz-font-tools
+/tmp/buzz-font-tools/bin/pip install fonttools==4.60.1
+/tmp/buzz-font-tools/bin/pyftsubset ../assets/fonts/TablerIcons.ttf \
+  --unicodes=eb55,ea5e,ea60,ea19,eaf0,eaf7,ebd6,eb16,ea5f \
+  --no-hinting --name-IDs='*' \
+  --output-file=app/src/main/res/font/tabler_icons.ttf
+```
