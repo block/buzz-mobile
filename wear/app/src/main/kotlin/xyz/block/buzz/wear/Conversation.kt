@@ -258,6 +258,25 @@ private fun AgentPill(agent: String, picture: String?, media: MediaFetcher?, can
     }
 }
 
+/** A way back that does not depend on knowing the swipe gesture. */
+@Composable
+private fun BackChip(label: String, onBack: () -> Unit) = CompactChip(
+    label = { Text(label) },
+    onClick = onBack,
+    colors = ChipDefaults.chipColors(
+        backgroundColor = MaterialTheme.colors.surface,
+        contentColor = MaterialTheme.colors.onSurface,
+    ),
+)
+
+/** The bottom of an input screen: its actions, centred where a round screen is widest. */
+@Composable
+private fun BottomActions(content: @Composable () -> Unit) = Row(
+    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+    verticalAlignment = Alignment.CenterVertically,
+    modifier = Modifier.fillMaxSize().wrapContentHeight(Alignment.Bottom).fillMaxWidth().padding(bottom = 12.dp),
+) { content() }
+
 /** How to write the message: emoji, voice or keyboard. */
 @Composable
 internal fun ComposeChoice(
@@ -269,6 +288,7 @@ internal fun ComposeChoice(
     onEmoji: () -> Unit,
     onMic: () -> Unit,
     onKeyboard: () -> Unit,
+    onBack: () -> Unit,
 ) {
     Scaffold(timeText = { TimeText() }) {
         AgentPill(agent, picture, media, canChange, onPickAgent)
@@ -293,6 +313,7 @@ internal fun ComposeChoice(
                 modifier = Modifier.size(52.dp).semantics { contentDescription = "Keyboard" },
             ) { Text("⌨", style = MaterialTheme.typography.title1) }
         }
+        BottomActions { BackChip("Back", onBack) }
     }
 }
 
@@ -306,6 +327,7 @@ internal fun Listen(
     state: ListenState,
     onSend: () -> Unit,
     onRetry: () -> Unit,
+    onBack: () -> Unit,
 ) {
     val inset = (LocalConfiguration.current.screenWidthDp * 0.12f).dp
     Scaffold(timeText = { TimeText() }) {
@@ -324,21 +346,17 @@ internal fun Listen(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize().wrapContentHeight(Alignment.Bottom).fillMaxWidth().padding(bottom = 12.dp),
-        ) {
+        BottomActions {
             when (state) {
-                ListenState.Heard -> SendButton(onSend)
-                ListenState.Missed -> CompactChip(
-                    label = { Text("Try again") },
-                    onClick = onRetry,
-                    colors = ChipDefaults.chipColors(
-                        backgroundColor = MaterialTheme.colors.surface,
-                        contentColor = MaterialTheme.colors.onSurface,
-                    ),
-                )
-                ListenState.Listening -> Unit
+                ListenState.Heard -> {
+                    BackChip("Cancel", onBack)
+                    SendButton(onSend)
+                }
+                ListenState.Missed -> {
+                    BackChip("Back", onBack)
+                    BackChip("Try again", onRetry)
+                }
+                ListenState.Listening -> BackChip("Cancel", onBack)
             }
         }
     }
@@ -353,7 +371,13 @@ private fun SendButton(onSend: () -> Unit) = Button(
 
 /** Typing a message: the watch keyboard opens at once, then one button to confirm. */
 @Composable
-internal fun Type(agent: String, picture: String?, media: MediaFetcher?, onSend: (String) -> Unit) {
+internal fun Type(
+    agent: String,
+    picture: String?,
+    media: MediaFetcher?,
+    onSend: (String) -> Unit,
+    onBack: () -> Unit,
+) {
     var text by remember { mutableStateOf("") }
     val focus = remember { FocusRequester() }
     val inset = (LocalConfiguration.current.screenWidthDp * 0.12f).dp
@@ -385,10 +409,8 @@ internal fun Type(agent: String, picture: String?, media: MediaFetcher?, onSend:
                 },
             )
         }
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize().wrapContentHeight(Alignment.Bottom).fillMaxWidth().padding(bottom = 12.dp),
-        ) {
+        BottomActions {
+            BackChip(if (text.isBlank()) "Back" else "Cancel", onBack)
             if (text.isNotBlank()) SendButton { onSend(text) }
         }
     }
@@ -398,7 +420,7 @@ private val emojis = listOf("👍", "👎", "🙏", "😂", "❤️", "🎉", "�
 
 /** A few emoji; a tap sends it. */
 @Composable
-internal fun EmojiChoice(onPick: (String) -> Unit) {
+internal fun EmojiChoice(onPick: (String) -> Unit, onBack: () -> Unit) {
     val list = rememberScalingLazyListState()
     Scaffold(positionIndicator = { PositionIndicator(scalingLazyListState = list) }) {
         ScalingLazyColumn(state = list, modifier = Modifier.fillMaxWidth()) {
@@ -416,6 +438,7 @@ internal fun EmojiChoice(onPick: (String) -> Unit) {
                     }
                 }
             }
+            item { BackChip("Back", onBack) }
         }
     }
 }

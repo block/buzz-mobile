@@ -79,14 +79,7 @@ class MainActivity : ComponentActivity() {
         SecretStore.prefs(this).registerOnSharedPreferenceChangeListener(onPaired)
         setContent {
             BuzzWatchTheme {
-                BackHandler(enabled = screen != Screen.Chat) {
-                    stopListening()
-                    // Back from an input goes to the input choice; from there, to the conversation.
-                    screen = when (screen) {
-                        Screen.Listen, Screen.Type, Screen.Emoji -> Screen.Compose
-                        else -> Screen.Chat
-                    }
-                }
+                BackHandler(enabled = screen != Screen.Chat, onBack = ::back)
                 when (screen) {
                     Screen.Chat -> Conversation(
                         status = status,
@@ -121,6 +114,7 @@ class MainActivity : ComponentActivity() {
                         onEmoji = { screen = Screen.Emoji },
                         onMic = ::speak,
                         onKeyboard = { screen = Screen.Type },
+                        onBack = ::back,
                     )
                     Screen.Listen -> Listen(
                         agent = agentLabel(),
@@ -130,9 +124,10 @@ class MainActivity : ComponentActivity() {
                         state = listening,
                         onSend = { deliver(heard) },
                         onRetry = ::listen,
+                        onBack = ::back,
                     )
-                    Screen.Type -> Type(agentLabel(), agent?.picture, media, onSend = ::deliver)
-                    Screen.Emoji -> EmojiChoice(onPick = ::deliver)
+                    Screen.Type -> Type(agentLabel(), agent?.picture, media, onSend = ::deliver, onBack = ::back)
+                    Screen.Emoji -> EmojiChoice(onPick = ::deliver, onBack = ::back)
                     Screen.Image -> FullImage(viewing, media) { screen = Screen.Chat }
                 }
             }
@@ -290,6 +285,15 @@ class MainActivity : ComponentActivity() {
     private fun choose(picked: Choice) {
         agent = picked
         channel?.let { SecretStore.prefs(this).edit().putString("agent:${it.id}", picked.id).apply() }
+    }
+
+    /** One step back: from an input to the input choice, from anywhere else to the conversation. */
+    private fun back() {
+        stopListening()
+        screen = when (screen) {
+            Screen.Listen, Screen.Type, Screen.Emoji -> Screen.Compose
+            else -> Screen.Chat
+        }
     }
 
     private fun agentLabel() = agent?.name ?: channel?.name ?: "Buzz"
