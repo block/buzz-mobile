@@ -61,12 +61,15 @@ class _MessageBubble extends HookConsumerWidget {
     // Watch only this user's profile to avoid rebuilding on unrelated cache changes.
     final pk = message.pubkey.toLowerCase();
     final ownMessage = currentPubkey?.toLowerCase() == pk;
-    final showSenderIdentity = showMessageAuthorName(
+    final reserveAvatar = showMessageAvatar(
       ref,
       currentChannelId,
       message.pubkey,
       currentPubkey,
     );
+    final avatarInset = reserveAvatar
+        ? messageAvatarSize + messageAvatarContentGap
+        : 0.0;
     final profile =
         ref.watch(userCacheProvider.select((cache) => cache[pk])) ??
         ref.read(userCacheProvider.notifier).get(pk);
@@ -189,26 +192,19 @@ class _MessageBubble extends HookConsumerWidget {
                 overlap: message.reactions.isNotEmpty ? Grid.xs : 0,
                 footer: message.reactions.isNotEmpty || replyFooter != null
                     ? Align(
-                        alignment: ownMessage
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
+                        alignment: AlignmentDirectional.centerStart,
                         child: Padding(
-                          padding: EdgeInsets.only(
-                            left: ownMessage || !showSenderIdentity
-                                ? 0
-                                : messageAvatarSize + messageAvatarContentGap,
+                          padding: EdgeInsetsDirectional.only(
+                            start: avatarInset,
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: ownMessage
-                                ? CrossAxisAlignment.end
-                                : CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               if (message.reactions.isNotEmpty)
                                 Padding(
-                                  padding: EdgeInsets.only(
-                                    right: ownMessage ? Grid.xxs : 0,
-                                    left: ownMessage ? 0 : Grid.xxs,
+                                  padding: const EdgeInsetsDirectional.only(
+                                    start: Grid.xxs,
                                   ),
                                   child: ReactionRow(
                                     combined: true,
@@ -246,43 +242,29 @@ class _MessageBubble extends HookConsumerWidget {
                     clipBehavior: Clip.none,
                     children: [
                       Row(
-                        textDirection: ownMessage
-                            ? TextDirection.rtl
-                            : TextDirection.ltr,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          if (!ownMessage && showSenderIdentity) ...[
-                            const SizedBox(width: messageAvatarSize),
-                            const SizedBox(width: messageAvatarContentGap),
-                          ],
+                          SizedBox(width: avatarInset),
                           Expanded(
                             child: Padding(
                               padding: EdgeInsets.only(
                                 top: showAuthor && !startsDay ? Grid.half : 0,
                               ),
                               child: Column(
-                                crossAxisAlignment: ownMessage
-                                    ? CrossAxisAlignment.end
-                                    : CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   if (showAuthor)
                                     Padding(
-                                      padding: EdgeInsets.only(
+                                      padding: const EdgeInsetsDirectional.only(
                                         bottom: Grid.quarter,
-                                        left: ownMessage ? 0 : Grid.xs,
-                                        right: ownMessage ? Grid.xs : 0,
+                                        start: Grid.xs,
                                       ),
                                       child: Row(
                                         children: [
                                           Expanded(
                                             child: MessageAuthorMeta(
                                               timestampGap: Grid.half,
-                                              showIdentity: showSenderIdentity,
                                               showTimestamp: true,
-                                              reversed: false,
-                                              alignment: ownMessage
-                                                  ? MainAxisAlignment.end
-                                                  : MainAxisAlignment.start,
                                               nameStyle:
                                                   messageUsernameTextStyle
                                                       .copyWith(
@@ -351,11 +333,6 @@ class _MessageBubble extends HookConsumerWidget {
                                       content: message.content,
                                       edited: message.edited,
                                       bubble: true,
-                                      additionalTextWidth:
-                                          !ownMessage && !showSenderIdentity
-                                          ? messageAvatarSize +
-                                                messageAvatarContentGap
-                                          : 0,
                                       hasReactions:
                                           message.reactions.isNotEmpty,
                                       bubbleEnd: showAvatar,
@@ -444,9 +421,9 @@ class _MessageBubble extends HookConsumerWidget {
                           ),
                         ],
                       ),
-                      if (showAvatar && !ownMessage && showSenderIdentity)
-                        Positioned(
-                          left: 0,
+                      if (showAvatar && reserveAvatar)
+                        PositionedDirectional(
+                          start: 0,
                           bottom: 0,
                           child: MessageMediaAvatar(
                             offset: mediaOffset,

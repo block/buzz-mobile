@@ -46,12 +46,15 @@ class _ThreadMessage extends HookConsumerWidget {
     final mediaOffset = useMessageMediaOffset(message.content, message.tags);
     final pk = message.pubkey.toLowerCase();
     final ownMessage = currentPubkey?.toLowerCase() == pk;
-    final showSenderIdentity = showMessageAuthorName(
+    final reserveAvatar = showMessageAvatar(
       ref,
       channelId,
       message.pubkey,
       currentPubkey,
     );
+    final avatarInset = reserveAvatar
+        ? messageAvatarSize + messageAvatarContentGap
+        : 0.0;
     final profile =
         ref.watch(userCacheProvider.select((cache) => cache[pk])) ??
         ref.read(userCacheProvider.notifier).get(pk);
@@ -178,17 +181,10 @@ class _ThreadMessage extends HookConsumerWidget {
                   overlap: message.reactions.isNotEmpty ? Grid.xs : 0,
                   footer: (isThreadHead || message.reactions.isNotEmpty)
                       ? Align(
-                          alignment: ownMessage
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
+                          alignment: AlignmentDirectional.centerStart,
                           child: Padding(
-                            padding: EdgeInsets.only(
-                              right: ownMessage ? Grid.xxs : 0,
-                              left: ownMessage || !showSenderIdentity
-                                  ? 0
-                                  : messageAvatarSize +
-                                        messageAvatarContentGap +
-                                        Grid.xxs,
+                            padding: EdgeInsetsDirectional.only(
+                              start: avatarInset + Grid.xxs,
                             ),
                             child: ReactionRow(
                               combined: true,
@@ -213,44 +209,30 @@ class _ThreadMessage extends HookConsumerWidget {
                       clipBehavior: Clip.none,
                       children: [
                         Row(
-                          textDirection: ownMessage
-                              ? TextDirection.rtl
-                              : TextDirection.ltr,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            if (!ownMessage && showSenderIdentity)
-                              const SizedBox(width: messageAvatarSize),
-                            if (!ownMessage && showSenderIdentity)
-                              const SizedBox(width: messageAvatarContentGap),
+                            SizedBox(width: avatarInset),
                             Expanded(
                               child: Padding(
                                 padding: EdgeInsets.only(
                                   top: showAuthor && !startsDay ? Grid.half : 0,
                                 ),
                                 child: Column(
-                                  crossAxisAlignment: ownMessage
-                                      ? CrossAxisAlignment.end
-                                      : CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     if (showAuthor)
                                       Padding(
-                                        padding: EdgeInsets.only(
-                                          bottom: Grid.quarter,
-                                          left: ownMessage ? 0 : Grid.xs,
-                                          right: ownMessage ? Grid.xs : 0,
-                                        ),
+                                        padding:
+                                            const EdgeInsetsDirectional.only(
+                                              bottom: Grid.quarter,
+                                              start: Grid.xs,
+                                            ),
                                         child: Row(
                                           children: [
                                             Expanded(
                                               child: MessageAuthorMeta(
                                                 timestampGap: Grid.half,
-                                                showIdentity:
-                                                    showSenderIdentity,
                                                 showTimestamp: true,
-                                                reversed: false,
-                                                alignment: ownMessage
-                                                    ? MainAxisAlignment.end
-                                                    : MainAxisAlignment.start,
                                                 nameStyle:
                                                     messageUsernameTextStyle
                                                         .copyWith(
@@ -314,11 +296,6 @@ class _ThreadMessage extends HookConsumerWidget {
                                       content: message.content,
                                       edited: message.edited,
                                       bubble: true,
-                                      additionalTextWidth:
-                                          !ownMessage && !showSenderIdentity
-                                          ? messageAvatarSize +
-                                                messageAvatarContentGap
-                                          : 0,
                                       hasReactions:
                                           message.reactions.isNotEmpty,
                                       bubbleEnd: showAvatar,
@@ -405,10 +382,9 @@ class _ThreadMessage extends HookConsumerWidget {
                             ),
                           ],
                         ),
-                        if (showAvatar && !ownMessage && showSenderIdentity)
-                          Positioned(
-                            left: ownMessage ? null : 0,
-                            right: ownMessage ? 0 : null,
+                        if (showAvatar && reserveAvatar)
+                          PositionedDirectional(
+                            start: 0,
                             bottom: 0,
                             child: MessageMediaAvatar(
                               offset: mediaOffset,

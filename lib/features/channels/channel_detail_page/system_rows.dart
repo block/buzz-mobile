@@ -702,7 +702,6 @@ class _ThreadSummaryRow extends ConsumerWidget {
     final labels = watchChannelIdentityLabels(ref, channelId, working);
     return ReplySummaryLink(
       key: ValueKey('thread-summary-${message.id}'),
-      mirrored: currentPubkey?.toLowerCase() == message.pubkey.toLowerCase(),
       summary: summary,
       working: working,
       workingNames: [

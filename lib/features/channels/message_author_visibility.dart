@@ -48,8 +48,8 @@ final confirmedConversationPairProvider = Provider.autoDispose
       return (sorted[0], sorted[1]);
     });
 
-/// Keep names unless membership confirms a conversation with only two people.
-bool showMessageAuthorName(
+/// Omit the avatar gutter when both sender and viewer belong to a confirmed pair.
+bool showMessageAvatar(
   WidgetRef ref,
   String channelId,
   String authorPubkey,

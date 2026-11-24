@@ -89,7 +89,7 @@ void bubbleLayoutTests() {
   for (final personalChat in [false, true]) {
     for (final scale in [1.0, 2.0]) {
       testWidgets(
-        'viewer bubbles align right: personal=$personalChat scale=$scale',
+        'sent and received messages share an edge: personal=$personalChat scale=$scale',
         (tester) async {
           tester.view.physicalSize = const Size(390, 1100);
           tester.view.devicePixelRatio = 1;
@@ -147,7 +147,7 @@ void bubbleLayoutTests() {
             'outgoing',
             find.byType(LocalSendBubbleSurface),
           );
-          expect(outgoing.center.dx, greaterThan(incoming.center.dx));
+          expect(outgoing.left, closeTo(incoming.left, 0.01));
           expect(
             bounds(
               'outgoing',
@@ -181,13 +181,11 @@ void bubbleLayoutTests() {
           );
           expect(incomingAvatar.right, lessThan(incoming.left));
           expect(incomingAvatar.size, const Size.square(36));
-          expect(
-            find.descendant(
-              of: find.byKey(const ValueKey('message-row-outgoing')),
-              matching: find.byType(MessageMediaAvatar),
-            ),
-            findsNothing,
+          final outgoingAvatar = bounds(
+            'outgoing',
+            find.byType(MessageMediaAvatar),
           );
+          expect(outgoingAvatar.left, incomingAvatar.left);
           expect(
             outgoing.right,
             closeTo(
@@ -205,19 +203,14 @@ void bubbleLayoutTests() {
             'outgoing',
             find.byKey(const ValueKey('combined-reaction-tray')),
           );
-          expect(
-            outgoingReaction.center.dx,
-            greaterThan(incomingReaction.center.dx),
-          );
+          expect(outgoingReaction.left, closeTo(incomingReaction.left, 0.01));
           expect(tester.takeException(), isNull);
         },
       );
     }
   }
 
-  testWidgets('thread replies reclaim the outgoing avatar gutter', (
-    tester,
-  ) async {
+  testWidgets('thread replies share the root message gutter', (tester) async {
     final root = _textMsg(id: threadIdRoot, pubkey: 'alice', content: 'Root');
     final reply = _textMsg(
       id: threadIdR1,
@@ -247,7 +240,7 @@ void bubbleLayoutTests() {
     );
     expect(
       find.descendant(of: row, matching: find.byType(MessageMediaAvatar)),
-      findsNothing,
+      findsOneWidget,
     );
     expect(bubble.right, closeTo(tester.getRect(row).right, 0.01));
     expect(tester.takeException(), isNull);

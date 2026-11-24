@@ -23,21 +23,26 @@ class _NestedThreadSummaryRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ownMessage =
-        currentPubkey?.toLowerCase() == replyMessage.pubkey.toLowerCase();
+    final reserveAvatar = showMessageAvatar(
+      ref,
+      channelId,
+      replyMessage.pubkey,
+      currentPubkey,
+    );
     return Align(
-      alignment: ownMessage ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: Directionality(
         textDirection: Directionality.of(context),
         child: Padding(
-          padding: EdgeInsets.only(
-            left: ownMessage ? 0 : messageAvatarSize + messageAvatarContentGap,
+          padding: EdgeInsetsDirectional.only(
+            start: reserveAvatar
+                ? messageAvatarSize + messageAvatarContentGap
+                : 0,
             bottom: Grid.xxs,
           ),
           child: ReplySummaryLink(
             key: ValueKey('nested-thread-summary-${replyMessage.id}'),
             summary: summary,
-            mirrored: ownMessage,
             hasReactions: replyMessage.reactions.isNotEmpty,
             onTap: () {
               Navigator.of(context).push(

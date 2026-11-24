@@ -7945,7 +7945,7 @@ void main() {
     for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
       for (final multiline in [false, true]) {
         testWidgets(
-          'outgoing group hides avatars throughout a local send: $platform, multiline=$multiline',
+          'outgoing group shows one avatar throughout a local send: $platform, multiline=$multiline',
           (tester) async {
             final previousPlatform = debugDefaultTargetPlatformOverride;
             debugDefaultTargetPlatformOverride = platform;
@@ -7976,7 +7976,7 @@ void main() {
                 of: find.byKey(ValueKey('message-row-$id')),
                 matching: find.byType(AvatarImage),
               );
-              expect(avatar('first'), findsNothing);
+              expect(avatar('first'), findsOneWidget);
               final container = ProviderScope.containerOf(
                 tester.element(find.byType(ChannelDetailPage)),
               );
@@ -8003,12 +8003,12 @@ void main() {
                 );
                 expect(
                   avatar('second'),
-                  findsNothing,
+                  findsOneWidget,
                   reason: 'second avatar frame $frame',
                 );
               }
               await tester.pumpAndSettle();
-              expect(avatar('second'), findsNothing);
+              expect(avatar('second'), findsOneWidget);
             } finally {
               debugDefaultTargetPlatformOverride = previousPlatform;
             }
@@ -14220,8 +14220,8 @@ void main() {
           expect(
             tester
                 .getRect(find.byKey(const ValueKey('thread-working-container')))
-                .right,
-            closeTo(tester.getRect(bubble).right - 32, 0.1),
+                .left,
+            closeTo(tester.getRect(bubble).left + 32, 0.1),
           );
         }
         typing.setEntries(const []);

@@ -202,9 +202,7 @@ void bubbleContentTests() {
     );
   });
 
-  testWidgets('neutral bubbles hug short text and distinguish own messages', (
-    tester,
-  ) async {
+  testWidgets('short messages fill the available width', (tester) async {
     for (final own in [false, true]) {
       await tester.pumpWidget(
         _testable(
@@ -213,7 +211,7 @@ void bubbleContentTests() {
       );
       await tester.pumpAndSettle();
       expect(bubbles, findsOneWidget);
-      expect(tester.getSize(bubbles).width, lessThan(160));
+      expect(tester.getSize(bubbles).width, greaterThan(160));
       final decoration = tester.widget<LocalSendBubbleSurface>(
         find.descendant(
           of: bubbles,
