@@ -15,6 +15,7 @@ import 'package:nostr/nostr.dart' as nostr;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../shared/agents/watch_pairing_poc.dart';
 import '../../shared/auth/auth.dart';
 import '../../shared/identity_transfer/nsec_export_sheet.dart';
 import '../../shared/clipboard_utils.dart';
@@ -40,6 +41,7 @@ part 'settings_page/status_section.dart';
 part 'settings_page/connection_section.dart';
 part 'settings_page/notifications_section.dart';
 part 'settings_page/builderlab_account_section.dart';
+part 'settings_page/watch_section.dart';
 
 Widget _emptyProfileEditPage(BuildContext context) => const SizedBox.shrink();
 
@@ -106,6 +108,7 @@ class SettingsPage extends HookConsumerWidget {
       ),
       if (HostedEnvironment.enabled)
         ('Account', const _BuilderlabAccountSection()),
+      if (kDebugMode) ('Watch', const _WatchSection()),
     ];
     Widget detail(String name, Widget section) => Builder(
       builder: (detailContext) => FrostedScaffold(
@@ -245,6 +248,7 @@ class SettingsPage extends HookConsumerWidget {
                   ],
                   if (!wide && HostedEnvironment.enabled)
                     const _BuilderlabAccountSection(),
+                  if (!wide && kDebugMode) const _WatchSection(),
                   // Rarely needed, so it sits last.
                   AppListCard(
                     verticalPadding: Grid.twelve,
