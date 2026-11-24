@@ -101,20 +101,25 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun Show(shown: Screen) {
         when (shown) {
-            Screen.Chat -> Conversation(
-                status = status,
-                title = channel?.name ?: "Buzz",
-                lines = lines,
-                busy = busy,
-                media = media,
-                onView = {
-                    viewing = it
-                    screen = Screen.Image
-                },
-                enabled = status == "Connected" && channel != null,
-                onSpeak = { screen = Screen.Compose },
-                onPick = { if (channels.isNotEmpty()) screen = Screen.Channels },
-            )
+            // First launch: nothing to show until the relay answers and the channel loads.
+            Screen.Chat -> if (channel == null && (status == CONNECTING || (status == "Connected" && channels.isNotEmpty()))) {
+                Connecting(CONNECTING)
+            } else {
+                Conversation(
+                    status = status,
+                    title = channel?.name ?: "Buzz",
+                    lines = lines,
+                    busy = busy,
+                    media = media,
+                    onView = {
+                        viewing = it
+                        screen = Screen.Image
+                    },
+                    enabled = status == "Connected" && channel != null,
+                    onSpeak = { screen = Screen.Compose },
+                    onPick = { if (channels.isNotEmpty()) screen = Screen.Channels },
+                )
+            }
             Screen.Channels -> Picker("Channel", channels, channel?.id, media, onBack = { screen = Screen.Chat }) {
                 open(it)
             }
@@ -174,7 +179,7 @@ class MainActivity : ComponentActivity() {
     private fun reconnect() {
         val paired = SecretStore.load(this) ?: return
         pairing = paired
-        status = "Connecting…"
+        status = CONNECTING
         io.execute {
             connection?.close()
             connection = null
@@ -417,5 +422,6 @@ private const val ACTIVITY = 20002
 
 // Matches the phone app: an indicator lasts this long without a fresh signal.
 private const val ACTIVITY_TTL_MS = 8000L
+private const val CONNECTING = "Connecting…"
 
 internal enum class ListenState { Listening, Heard, Missed }
