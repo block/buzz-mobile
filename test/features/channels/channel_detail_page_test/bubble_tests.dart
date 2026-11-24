@@ -75,7 +75,12 @@ void bubbleLayoutTests() {
         find.byKey(const ValueKey('channel-day-divider-opacity-87400')),
       );
       final after = tester.getRect(
-        find.byKey(const ValueKey('message-author-after-day')),
+        find
+            .ancestor(
+              of: find.byKey(const ValueKey('message-author-after-day')),
+              matching: find.byType(TextButton),
+            )
+            .first,
       );
       expect(
         divider.top - before.bottom,
@@ -89,7 +94,7 @@ void bubbleLayoutTests() {
   for (final personalChat in [false, true]) {
     for (final scale in [1.0, 2.0]) {
       testWidgets(
-        'viewer bubbles align right: personal=$personalChat scale=$scale',
+        'sent and received messages share an edge: personal=$personalChat scale=$scale',
         (tester) async {
           tester.view.physicalSize = const Size(390, 1100);
           tester.view.devicePixelRatio = 1;
@@ -147,7 +152,7 @@ void bubbleLayoutTests() {
             'outgoing',
             find.byType(LocalSendBubbleSurface),
           );
-          expect(outgoing.center.dx, greaterThan(incoming.center.dx));
+          expect(outgoing.left, closeTo(incoming.left, 0.01));
           expect(
             bounds(
               'outgoing',
@@ -175,19 +180,11 @@ void bubbleLayoutTests() {
 
           expect(outgoing.right, greaterThan(300));
           expect(incoming.left, lessThan(90));
-          final incomingAvatar = bounds(
-            'incoming',
-            find.byType(MessageMediaAvatar),
-          );
-          expect(incomingAvatar.right, lessThan(incoming.left));
-          expect(incomingAvatar.size, const Size.square(36));
-          expect(
-            find.descendant(
-              of: find.byKey(const ValueKey('message-row-outgoing')),
-              matching: find.byType(MessageMediaAvatar),
-            ),
-            findsNothing,
-          );
+          final incomingAvatar = bounds('incoming', find.byType(AvatarImage));
+          expect(incomingAvatar.left, greaterThan(incoming.left));
+          expect(incomingAvatar.size, const Size.square(16));
+          final outgoingAvatar = bounds('outgoing', find.byType(AvatarImage));
+          expect(outgoingAvatar.left, incomingAvatar.left);
           expect(
             outgoing.right,
             closeTo(
@@ -205,19 +202,14 @@ void bubbleLayoutTests() {
             'outgoing',
             find.byKey(const ValueKey('combined-reaction-tray')),
           );
-          expect(
-            outgoingReaction.center.dx,
-            greaterThan(incomingReaction.center.dx),
-          );
+          expect(outgoingReaction.left, closeTo(incomingReaction.left, 0.01));
           expect(tester.takeException(), isNull);
         },
       );
     }
   }
 
-  testWidgets('thread replies reclaim the outgoing avatar gutter', (
-    tester,
-  ) async {
+  testWidgets('thread replies use the full row width', (tester) async {
     final root = _textMsg(id: threadIdRoot, pubkey: 'alice', content: 'Root');
     final reply = _textMsg(
       id: threadIdR1,
@@ -246,10 +238,11 @@ void bubbleLayoutTests() {
           .first,
     );
     expect(
-      find.descendant(of: row, matching: find.byType(MessageMediaAvatar)),
-      findsNothing,
+      find.descendant(of: row, matching: find.byType(AvatarImage)),
+      findsOneWidget,
     );
     expect(bubble.right, closeTo(tester.getRect(row).right, 0.01));
+    expect(bubble.left, closeTo(tester.getRect(row).left, 0.01));
     expect(tester.takeException(), isNull);
   });
 
@@ -812,7 +805,7 @@ void bubbleLayoutTests() {
     );
   });
 
-  testWidgets('channel groups keep one avatar on the last message', (
+  testWidgets('channel groups place one avatar beside the first byline', (
     tester,
   ) async {
     final notifier = _FakeMessagesNotifier([
@@ -827,11 +820,11 @@ void bubbleLayoutTests() {
     final last = find.byKey(const ValueKey('message-row-last'));
     expect(
       find.descendant(of: first, matching: find.byType(AvatarImage)),
-      findsNothing,
+      findsOneWidget,
     );
     expect(
       find.descendant(of: last, matching: find.byType(AvatarImage)),
-      findsOneWidget,
+      findsNothing,
     );
     expect(find.byKey(const ValueKey('message-author-first')), findsOneWidget);
     expect(find.byKey(const ValueKey('message-author-last')), findsNothing);
@@ -847,7 +840,7 @@ void bubbleLayoutTests() {
     );
   });
 
-  testWidgets('live appends move the group avatar and author changes end it', (
+  testWidgets('live appends keep the avatar with the group byline', (
     tester,
   ) async {
     final first = _textMsg(id: 'first', pubkey: 'alice', content: 'First');
@@ -875,11 +868,11 @@ void bubbleLayoutTests() {
     expect(avatar('first'), findsOneWidget);
     notifier.setMessages([first, next]);
     await tester.pumpAndSettle();
-    expect(avatar('first'), findsNothing);
-    expect(avatar('next'), findsOneWidget);
+    expect(avatar('first'), findsOneWidget);
+    expect(avatar('next'), findsNothing);
     notifier.setMessages([first, next, other]);
     await tester.pumpAndSettle();
-    expect(avatar('next'), findsOneWidget);
+    expect(avatar('next'), findsNothing);
     expect(avatar('other'), findsOneWidget);
     notifier.setMessages([first]);
     await tester.pumpAndSettle();
@@ -913,67 +906,66 @@ void bubbleLayoutTests() {
     });
   }
 
-  testWidgets(
-    'thread replies use the same bubble and group-end avatar layout',
-    (tester) async {
-      final events = [
-        _textMsg(id: threadIdRoot, pubkey: 'bob', content: 'Root'),
-        _textMsg(
-          id: 'first',
-          pubkey: 'alice',
-          content: 'First reply',
-          createdAt: 1010,
-          extraTags: const [
-            ['e', threadIdRoot, '', 'reply'],
-          ],
+  testWidgets('thread replies place one avatar beside the first byline', (
+    tester,
+  ) async {
+    final events = [
+      _textMsg(id: threadIdRoot, pubkey: 'bob', content: 'Root'),
+      _textMsg(
+        id: 'first',
+        pubkey: 'alice',
+        content: 'First reply',
+        createdAt: 1010,
+        extraTags: const [
+          ['e', threadIdRoot, '', 'reply'],
+        ],
+      ),
+      _textMsg(
+        id: 'last',
+        pubkey: 'alice',
+        content: 'Last reply',
+        createdAt: 1020,
+        extraTags: const [
+          ['e', threadIdRoot, '', 'reply'],
+        ],
+      ),
+    ];
+    final messages = formatTimeline(events);
+    await tester.pumpWidget(
+      _buildTestable(
+        messages: events,
+        home: ThreadDetailPage(
+          threadHead: messages.firstWhere((m) => m.id == threadIdRoot),
+          allMessages: messages,
+          channelId: _channelId,
+          currentPubkey: 'me',
+          isMember: true,
+          isArchived: false,
         ),
-        _textMsg(
-          id: 'last',
-          pubkey: 'alice',
-          content: 'Last reply',
-          createdAt: 1020,
-          extraTags: const [
-            ['e', threadIdRoot, '', 'reply'],
-          ],
-        ),
-      ];
-      final messages = formatTimeline(events);
-      await tester.pumpWidget(
-        _buildTestable(
-          messages: events,
-          home: ThreadDetailPage(
-            threadHead: messages.firstWhere((m) => m.id == threadIdRoot),
-            allMessages: messages,
-            channelId: _channelId,
-            currentPubkey: 'me',
-            isMember: true,
-            isArchived: false,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      final first = find.byKey(const ValueKey('thread-message-row-first'));
-      final last = find.byKey(const ValueKey('thread-message-row-last'));
-      expect(
-        find.descendant(of: first, matching: find.byType(AvatarImage)),
-        findsNothing,
-      );
-      expect(
-        find.descendant(of: last, matching: find.byType(AvatarImage)),
-        findsOneWidget,
-      );
-      expect(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget.key is ValueKey<String> &&
-              (widget.key! as ValueKey<String>).value.startsWith(
-                'message-text-bubble-',
-              ),
-        ),
-        findsNWidgets(3),
-      );
-    },
-  );
+      ),
+    );
+    await tester.pumpAndSettle();
+    final first = find.byKey(const ValueKey('thread-message-row-first'));
+    final last = find.byKey(const ValueKey('thread-message-row-last'));
+    expect(
+      find.descendant(of: first, matching: find.byType(AvatarImage)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: last, matching: find.byType(AvatarImage)),
+      findsNothing,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget.key is ValueKey<String> &&
+            (widget.key! as ValueKey<String>).value.startsWith(
+              'message-text-bubble-',
+            ),
+      ),
+      findsNWidgets(3),
+    );
+  });
 }
 
 class _GroupedReactionActions implements ChannelActions {

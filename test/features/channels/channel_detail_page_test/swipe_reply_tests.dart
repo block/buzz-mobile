@@ -233,10 +233,6 @@ void swipeReplyTests() {
               tester.view.physicalSize.width / tester.view.devicePixelRatio,
             ),
           );
-          if (!own) {
-            // Incoming bubbles leave room for the usual gutter.
-            expect(circleRect.left, closeTo(bubbleRect.right + Grid.xxs, 0.01));
-          }
           final fill =
               tester.widget<DecoratedBox>(circle).decoration as BoxDecoration;
           // The armed circle uses the chosen message color, not the app accent.

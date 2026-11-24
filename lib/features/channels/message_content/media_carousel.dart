@@ -231,9 +231,6 @@ class _MessageImageCarousel extends HookConsumerWidget {
                                     BorderRadius.circular(Radii.md))
                                 .topLeft
                                 .x,
-                        onScroll: (offset) => MessageGalleryScrollNotification(
-                          offset,
-                        ).dispatch(context),
                         onPageChanged: (index) {
                           if (index != currentIndex.value) {
                             unawaited(HapticFeedback.selectionClick());
@@ -416,10 +413,6 @@ class _MessageCarouselViewport extends HookWidget {
       child: NotificationListener<ScrollUpdateNotification>(
         onNotification: (notification) {
           if (notification.depth == 0 && notification.metrics is PageMetrics) {
-            MessageGalleryScrollNotification(
-              notification.metrics.pixels -
-                  notification.metrics.minScrollExtent,
-            ).dispatch(context);
             final index = (notification.metrics as PageMetrics).page!.round();
             if (index != currentIndex) onPageChanged(index);
           }

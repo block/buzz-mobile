@@ -1,8 +1,10 @@
 import 'message_reply_drag_target.dart';
+
 import 'package:buzz/shared/widgets/feedback_snackbar.dart';
 
 import 'dart:async';
 import 'dart:convert';
+
 import '../../shared/widgets/ios_media_carousel.dart';
 import '../../shared/widgets/message_attachment_corners.dart';
 
@@ -57,7 +59,6 @@ import 'message_mention_pill.dart';
 import 'message_gallery.dart';
 import 'message_gallery_frame.dart';
 import 'message_long_press_region.dart';
-import 'message_media_avatar.dart';
 import 'message_media_geometry.dart';
 import 'voice_note_attachment.dart';
 
@@ -120,9 +121,6 @@ class MessageContent extends HookConsumerWidget {
 
   /// Paint conversation text bubbles while keeping attachments on the page.
   final bool bubble;
-
-  /// Space reclaimed from an omitted sender avatar and its gutter.
-  final double additionalTextWidth;
 
   /// Distinguishes messages authored by the signed-in identity.
   final bool ownMessage;
@@ -204,7 +202,6 @@ class MessageContent extends HookConsumerWidget {
     super.key,
     required this.content,
     this.bubble = false,
-    this.additionalTextWidth = 0,
     this.ownMessage = false,
     this.trimTrailingSpacing = false,
     this.bubbleEnd = true,
@@ -498,9 +495,7 @@ class MessageContent extends HookConsumerWidget {
         : renderMarkdown(text);
     final markdown = bubble
         ? Column(
-            crossAxisAlignment: ownMessage
-                ? CrossAxisAlignment.end
-                : CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               for (final (index, segment) in segments.indexed)
@@ -528,13 +523,8 @@ class MessageContent extends HookConsumerWidget {
                           ? 0
                           : Grid.quarter,
                     ),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth:
-                            MediaQuery.sizeOf(context).width *
-                                messageTextMaxWidthFraction +
-                            additionalTextWidth,
-                      ),
+                    child: SizedBox(
+                      width: double.infinity,
                       child: MessageReplyDragTarget(
                         child: LocalSendBubbleSurface(
                           color: ownMessage
@@ -574,14 +564,15 @@ class MessageContent extends HookConsumerWidget {
             ],
           )
         : renderBody(finalContent, last: true);
+    final alignEnd = !bubble && ownMessage;
     if (trailingGallery == null) {
       return edited && !editedInBody
-          ? withEditedMarkerBelow(markdown, end: ownMessage)
+          ? withEditedMarkerBelow(markdown, end: alignEnd)
           : markdown;
     }
 
     return Column(
-      crossAxisAlignment: ownMessage
+      crossAxisAlignment: alignEnd
           ? CrossAxisAlignment.end
           : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,

@@ -4,7 +4,7 @@ import 'grid.dart';
 
 const _fontFamily = 'Inter';
 
-/// Avatar size for full channel and thread messages.
+/// Avatar size for typing, welcome, and activity rows in conversations.
 const messageAvatarSize = 36.0;
 
 /// Avatar size for conversation-oriented Activity rows.
@@ -15,9 +15,6 @@ const compactMessageAvatarSize = 42.0;
 
 /// Horizontal space between a message avatar and its content.
 const messageAvatarContentGap = Grid.twelve;
-
-/// Maximum text-bubble width relative to the screen, including padding.
-const messageTextMaxWidthFraction = 2 / 3;
 
 /// Primary message copy: 15sp regular on a 20sp line height.
 const messageBodyTextStyle = TextStyle(

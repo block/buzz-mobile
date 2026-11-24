@@ -22,7 +22,7 @@ class IosMediaCarousel extends HookWidget {
     required this.trailingPadding,
     required this.radius,
     required this.onOpen,
-    required this.onScroll,
+    this.onScroll,
     required this.onPageChanged,
   });
 
@@ -35,7 +35,7 @@ class IosMediaCarousel extends HookWidget {
   final double trailingPadding;
   final double radius;
   final ValueChanged<int> onOpen;
-  final ValueChanged<double> onScroll;
+  final ValueChanged<double>? onScroll;
   final ValueChanged<int> onPageChanged;
 
   @override
@@ -81,7 +81,7 @@ class IosMediaCarousel extends HookWidget {
             );
           }
         } else if (call.method == 'scroll' && argument is num) {
-          widget.onScroll(argument.toDouble());
+          widget.onScroll?.call(argument.toDouble());
         } else if (argument is int &&
             argument >= 0 &&
             argument < widget.providers.length) {

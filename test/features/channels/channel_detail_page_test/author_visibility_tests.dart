@@ -82,55 +82,22 @@ void messageAuthorVisibilityTests() {
           ),
         );
         await tester.pumpAndSettle();
-        // Live activity replaces the Channel object; rows must not be told
-        // to recompute identity unless the confirmed pair itself changes.
-        final container = ProviderScope.containerOf(
-          tester.element(find.byType(ChannelDetailPage)),
-        );
-        var pairNotifications = 0;
-        final pairSubscription = container.listen(
-          confirmedConversationPairProvider(_channelId),
-          (_, _) => pairNotifications++,
-        );
-        channels.setChannels([channel.copyWith(lastMessageAt: DateTime(2026))]);
-        await tester.pump();
-        expect(pairNotifications, 0);
-        pairSubscription.close();
         final name = find.byKey(const ValueKey('message-author-incoming'));
-        final hidesName =
-            kind == 'dm' || kind == 'solo' || kind == 'pair-channel';
-        expect(name, hidesName ? findsNothing : findsOneWidget);
+        expect(name, findsOneWidget);
+        expect(
+          tester.widget<Text>(name).data,
+          kind == 'outsider' ? 'Bob' : 'Alice',
+        );
+        final ownName = find.byKey(const ValueKey('message-author-outgoing'));
+        expect(ownName, findsOneWidget);
+        expect(tester.widget<Text>(ownName).data, 'Me');
+
         final incomingRow = find.byKey(const ValueKey('message-row-incoming'));
         final outgoingRow = find.byKey(const ValueKey('message-row-outgoing'));
-        final incomingAvatars = find.descendant(
-          of: incomingRow,
-          matching: find.byType(AvatarImage),
-        );
-        expect(incomingAvatars, hidesName ? findsNothing : findsOneWidget);
-        double bubbleWidth(Finder row) => tester
-            .getSize(
-              find
-                  .descendant(
-                    of: row,
-                    matching: find.byKey(
-                      const ValueKey('message-text-bubble-0'),
-                    ),
-                  )
-                  .first,
-            )
-            .width;
-        final productionCap =
-            MediaQuery.sizeOf(tester.element(incomingRow)).width * 2 / 3;
-        expect(
-          bubbleWidth(incomingRow),
-          closeTo(productionCap + (hidesName ? 48 : 0), 0.1),
-        );
-        expect(bubbleWidth(outgoingRow), closeTo(productionCap, 0.1));
-
-        expect(
-          find.descendant(of: outgoingRow, matching: find.byType(AvatarImage)),
-          findsNothing,
-        );
+        Finder avatars(Finder row) =>
+            find.descendant(of: row, matching: find.byType(AvatarImage));
+        expect(avatars(incomingRow), findsOneWidget);
+        expect(avatars(outgoingRow), findsOneWidget);
 
         expect(
           find.byKey(const ValueKey('message-timestamp-incoming')),
@@ -140,19 +107,6 @@ void messageAuthorVisibilityTests() {
           find.byKey(const ValueKey('message-timestamp-outgoing')),
           findsOneWidget,
         );
-        final ownName = find.byKey(const ValueKey('message-author-outgoing'));
-        final hidesOwnName = hidesName || kind == 'outsider';
-        expect(ownName, hidesOwnName ? findsNothing : findsOneWidget);
-        if (!hidesOwnName) {
-          expect(tester.widget<Text>(ownName).data, 'You');
-        }
-        if (!hidesName) {
-          final context = tester.element(name);
-          expect(
-            tester.widget<Text>(name).style?.color,
-            context.tertiaryTextColor,
-          );
-        }
         final root = _textMsg(
           id: 'incoming',
           pubkey: kind == 'outsider' ? 'bob' : 'alice',
@@ -181,13 +135,10 @@ void messageAuthorVisibilityTests() {
         );
         expect(threadRow, findsOneWidget);
         expect(
-          bubbleWidth(threadRow),
-          closeTo(productionCap + (hidesName ? 48 : 0), 0.1),
+          find.byKey(const ValueKey('thread-message-author-incoming')),
+          findsOneWidget,
         );
-        expect(
-          find.descendant(of: threadRow, matching: find.byType(AvatarImage)),
-          hidesName ? findsNothing : findsOneWidget,
-        );
+        expect(avatars(threadRow), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
     }
