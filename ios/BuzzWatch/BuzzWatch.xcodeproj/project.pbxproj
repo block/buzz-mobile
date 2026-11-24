@@ -1,0 +1,387 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		03823D21F82EB4B619ED31AF /* WatchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 420F03622F2C3995129E8A7F /* WatchModel.swift */; };
+		1A4A303267A8A70F32094548 /* BuzzWatchCore in Frameworks */ = {isa = PBXBuildFile; productRef = 17B0786EB01B352C77D31FB4 /* BuzzWatchCore */; };
+		26422497F648FD8F3863B6FE /* Bees.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50EA08AE616A47035613FB7 /* Bees.swift */; };
+		420185B599D060663EF98E96 /* PairingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B0D198A7B942FEC221D68D /* PairingStore.swift */; };
+		58290C879DBC0F667F420E47 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A5DF56C18775BA3C5D50DA9 /* Assets.xcassets */; };
+		5DF91EBE8EF6984EE4C1F99C /* Screens.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9DE410E4E7FE46FB0005980 /* Screens.swift */; };
+		715C9AAEDA0C2E32E5E24249 /* tabler_icons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5C28D0B8AF83193441E287E /* tabler_icons.ttf */; };
+		809C4C3B14B5A282F1C6E494 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3154E3D880E67501C7DE70A /* Theme.swift */; };
+		AADE353156ED6196668187FB /* BuzzWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00B17D07175E4080C07306F7 /* BuzzWatchApp.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		00B17D07175E4080C07306F7 /* BuzzWatchApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BuzzWatchApp.swift; sourceTree = "<group>"; };
+		420F03622F2C3995129E8A7F /* WatchModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchModel.swift; sourceTree = "<group>"; };
+		4A5DF56C18775BA3C5D50DA9 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		52B0D198A7B942FEC221D68D /* PairingStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PairingStore.swift; sourceTree = "<group>"; };
+		7A630973D5534DCC4766981F /* BuzzWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BuzzWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB4C5BD6F6A53C7B36C8EFBA /* BuzzWatch.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = BuzzWatch.xcconfig; sourceTree = "<group>"; };
+		B9DE410E4E7FE46FB0005980 /* Screens.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Screens.swift; sourceTree = "<group>"; };
+		D5C28D0B8AF83193441E287E /* tabler_icons.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = tabler_icons.ttf; path = Fonts/tabler_icons.ttf; sourceTree = "<group>"; };
+		F3154E3D880E67501C7DE70A /* Theme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		F50EA08AE616A47035613FB7 /* Bees.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Bees.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E6C51A030321A90B6BA7263F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A4A303267A8A70F32094548 /* BuzzWatchCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		00BCCA45E56137A42F123405 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7A630973D5534DCC4766981F /* BuzzWatch.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		53AA1D25AF32B6FCA5305DE8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D03DC927AE8DB38DC346F779 /* watchOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5BC2350C6CDE917C6DE4A2CA /* BuzzWatch */ = {
+			isa = PBXGroup;
+			children = (
+				F50EA08AE616A47035613FB7 /* Bees.swift */,
+				00B17D07175E4080C07306F7 /* BuzzWatchApp.swift */,
+				52B0D198A7B942FEC221D68D /* PairingStore.swift */,
+				B9DE410E4E7FE46FB0005980 /* Screens.swift */,
+				F3154E3D880E67501C7DE70A /* Theme.swift */,
+				420F03622F2C3995129E8A7F /* WatchModel.swift */,
+				4A5DF56C18775BA3C5D50DA9 /* Assets.xcassets */,
+				D5C28D0B8AF83193441E287E /* tabler_icons.ttf */,
+			);
+			name = BuzzWatch;
+			path = BuzzWatch;
+			sourceTree = "<group>";
+		};
+		A6D4C93D1C18F70083A130C4 = {
+			isa = PBXGroup;
+			children = (
+				00BCCA45E56137A42F123405 /* Products */,
+				53AA1D25AF32B6FCA5305DE8 /* Frameworks */,
+				5BC2350C6CDE917C6DE4A2CA /* BuzzWatch */,
+				AB4C5BD6F6A53C7B36C8EFBA /* BuzzWatch.xcconfig */,
+			);
+			sourceTree = "<group>";
+		};
+		D03DC927AE8DB38DC346F779 /* watchOS */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = watchOS;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		37BB352A10F66F05D3D79C7F /* BuzzWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CC7E59285D96CCD688C58F61 /* Build configuration list for PBXNativeTarget "BuzzWatch" */;
+			buildPhases = (
+				E8BFA90D4F32E8D7A430FA28 /* Sources */,
+				E6C51A030321A90B6BA7263F /* Frameworks */,
+				2DE9F7DC0000104F63B7E812 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BuzzWatch;
+			packageProductDependencies = (
+				17B0786EB01B352C77D31FB4 /* BuzzWatchCore */,
+			);
+			productName = BuzzWatch;
+			productReference = 7A630973D5534DCC4766981F /* BuzzWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		35FFACFA7094843556B0D136 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = 59F67FE1AA15848B37B06F6E /* Build configuration list for PBXProject "BuzzWatch" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A6D4C93D1C18F70083A130C4;
+			minimizedProjectReferenceProxies = 0;
+			packageReferences = (
+				9F37C7E31F8993C7AA916C61 /* XCLocalSwiftPackageReference "BuzzWatchCore" */,
+			);
+			preferredProjectObjectVersion = 100;
+			productRefGroup = 00BCCA45E56137A42F123405 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				37BB352A10F66F05D3D79C7F /* BuzzWatch */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2DE9F7DC0000104F63B7E812 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				58290C879DBC0F667F420E47 /* Assets.xcassets in Resources */,
+				715C9AAEDA0C2E32E5E24249 /* tabler_icons.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E8BFA90D4F32E8D7A430FA28 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				26422497F648FD8F3863B6FE /* Bees.swift in Sources */,
+				AADE353156ED6196668187FB /* BuzzWatchApp.swift in Sources */,
+				420185B599D060663EF98E96 /* PairingStore.swift in Sources */,
+				5DF91EBE8EF6984EE4C1F99C /* Screens.swift in Sources */,
+				809C4C3B14B5A282F1C6E494 /* Theme.swift in Sources */,
+				03823D21F82EB4B619ED31AF /* WatchModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		11CA4303F1CC0A5EE9BDC1C1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = AB4C5BD6F6A53C7B36C8EFBA /* BuzzWatch.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Buzz;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "$(BUNDLE_IDENTIFIER)";
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_IDENTIFIER).watchkitapp";
+				PRODUCT_NAME = BuzzWatch;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		3E2612A2BABF1CCA5798629D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = AB4C5BD6F6A53C7B36C8EFBA /* BuzzWatch.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		8F7FBE0A418BB51CE4F16FC9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = AB4C5BD6F6A53C7B36C8EFBA /* BuzzWatch.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		BC51299CA2C9A459E9108E4E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = AB4C5BD6F6A53C7B36C8EFBA /* BuzzWatch.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Buzz;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "$(BUNDLE_IDENTIFIER)";
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_IDENTIFIER).watchkitapp";
+				PRODUCT_NAME = BuzzWatch;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		59F67FE1AA15848B37B06F6E /* Build configuration list for PBXProject "BuzzWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E2612A2BABF1CCA5798629D /* Debug */,
+				8F7FBE0A418BB51CE4F16FC9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CC7E59285D96CCD688C58F61 /* Build configuration list for PBXNativeTarget "BuzzWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC51299CA2C9A459E9108E4E /* Release */,
+				11CA4303F1CC0A5EE9BDC1C1 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		9F37C7E31F8993C7AA916C61 /* XCLocalSwiftPackageReference "BuzzWatchCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../BuzzWatchCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		17B0786EB01B352C77D31FB4 /* BuzzWatchCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = BuzzWatchCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 35FFACFA7094843556B0D136 /* Project object */;
+}

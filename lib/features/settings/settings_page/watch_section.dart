@@ -1,6 +1,6 @@
 part of '../settings_page.dart';
 
-/// Proof of concept, shown in debug builds only: pairs a Wear OS watch.
+/// Proof of concept, shown in debug builds only: pairs a Wear OS or Apple watch.
 class _WatchSection extends ConsumerWidget {
   const _WatchSection();
 

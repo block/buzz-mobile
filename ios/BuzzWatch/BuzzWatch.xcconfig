@@ -1,0 +1,9 @@
+// The watch app belongs to the phone app with this bundle identifier and is
+// signed by the same team. These follow the phone's defaults and its local
+// overrides (ios/Flutter/Debug.xcconfig), so a developer's own build of the
+// phone app gets a matching watch app.
+BUNDLE_IDENTIFIER = xyz.block.buzz.dev.mobile
+BUZZ_DEVELOPMENT_TEAM = JMTDPW9CG3
+#include? "../Flutter/WorktreeOverrides.xcconfig"
+#include? "../Flutter/AppOverrides.xcconfig"
+DEVELOPMENT_TEAM = $(BUZZ_DEVELOPMENT_TEAM)

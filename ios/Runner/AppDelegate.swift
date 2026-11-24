@@ -55,6 +55,7 @@ import os.log
   private var nativeCommunityEntryCoordinator: NativeCommunityEntryCoordinator?
   private var nativeProfileTextEditorCoordinator: NativeProfileTextEditorCoordinator?
   private var identityFilePlugin: IdentityFilePlugin?
+  private var watchPairingPlugin: WatchPairingPlugin?
   private var hostedHpkeChannel: FlutterMethodChannel?
   private var browserAuthBridge: BuzzBrowserAuthBridge?
   private var huddleMediaPlugin: HuddleMediaPlugin?
@@ -93,6 +94,10 @@ import os.log
       }
     }
     identityFilePlugin = IdentityFilePlugin(messenger: messenger)
+    #if DEBUG
+    // Proof of concept; the Settings row that uses it is debug-only too.
+    watchPairingPlugin = WatchPairingPlugin(messenger: messenger)
+    #endif
     HomeScreenShortcuts.shared.attach(messenger: messenger)
     shareSuggestions = ShareSuggestions { [weak self] in
       self?.appGroupIdentifier.flatMap {
