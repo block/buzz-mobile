@@ -84,8 +84,11 @@ void actionRowTests() {
         }
         expect(body, findsOneWidget);
         final regularBody = tester.getRect(findRichText('Regular message'));
-        final regularAuthor = tester.getRect(
-          find.byKey(const ValueKey('message-author-regular')),
+        final regularAvatar = tester.getRect(
+          find.descendant(
+            of: find.byKey(const ValueKey('message-row-regular')),
+            matching: find.byType(AvatarImage),
+          ),
         );
         final actionBody = tester.getRect(body);
         final actionAuthor = tester.getRect(author);
@@ -94,7 +97,7 @@ void actionRowTests() {
         );
         expect(card.center.dx, closeTo(tester.getRect(row).center.dx, 0.01));
         expect(actionAuthor.left, greaterThanOrEqualTo(actionBody.left));
-        expect(regularAuthor.left, regularBody.left);
+        expect(regularAvatar.left, regularBody.left);
         expect(actionAuthor.top, greaterThanOrEqualTo(actionBody.top));
         final timestamp = find.byKey(
           const ValueKey('system-message-timestamp-alice'),

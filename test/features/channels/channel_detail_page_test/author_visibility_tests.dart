@@ -82,20 +82,6 @@ void messageAuthorVisibilityTests() {
           ),
         );
         await tester.pumpAndSettle();
-        // Live activity replaces the Channel object; rows must not be told
-        // to recompute identity unless the confirmed pair itself changes.
-        final container = ProviderScope.containerOf(
-          tester.element(find.byType(ChannelDetailPage)),
-        );
-        var pairNotifications = 0;
-        final pairSubscription = container.listen(
-          confirmedConversationPairProvider(_channelId),
-          (_, _) => pairNotifications++,
-        );
-        channels.setChannels([channel.copyWith(lastMessageAt: DateTime(2026))]);
-        await tester.pump();
-        expect(pairNotifications, 0);
-        pairSubscription.close();
         final name = find.byKey(const ValueKey('message-author-incoming'));
         expect(name, findsOneWidget);
         expect(
@@ -104,18 +90,14 @@ void messageAuthorVisibilityTests() {
         );
         final ownName = find.byKey(const ValueKey('message-author-outgoing'));
         expect(ownName, findsOneWidget);
-        expect(tester.widget<Text>(ownName).data, 'You');
+        expect(tester.widget<Text>(ownName).data, 'Me');
 
         final incomingRow = find.byKey(const ValueKey('message-row-incoming'));
         final outgoingRow = find.byKey(const ValueKey('message-row-outgoing'));
-        final paired = kind == 'dm' || kind == 'solo' || kind == 'pair-channel';
         Finder avatars(Finder row) =>
             find.descendant(of: row, matching: find.byType(AvatarImage));
-        expect(avatars(incomingRow), paired ? findsNothing : findsOneWidget);
-        expect(
-          avatars(outgoingRow),
-          paired || kind == 'outsider' ? findsNothing : findsOneWidget,
-        );
+        expect(avatars(incomingRow), findsOneWidget);
+        expect(avatars(outgoingRow), findsOneWidget);
 
         expect(
           find.byKey(const ValueKey('message-timestamp-incoming')),
@@ -156,7 +138,7 @@ void messageAuthorVisibilityTests() {
           find.byKey(const ValueKey('thread-message-author-incoming')),
           findsOneWidget,
         );
-        expect(avatars(threadRow), paired ? findsNothing : findsOneWidget);
+        expect(avatars(threadRow), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
     }

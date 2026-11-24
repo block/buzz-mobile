@@ -268,7 +268,7 @@ class _ThreadMessageList extends HookWidget {
                             chronologicalIndex + 1 < replies.length
                             ? replies[chronologicalIndex + 1]
                             : null;
-                        final showAvatar =
+                        final endsGroup =
                             reply.hasAttachments ||
                             nextReply?.hasAttachments == true ||
                             nextReply == null ||
@@ -326,7 +326,7 @@ class _ThreadMessageList extends HookWidget {
                                     channelId: channelId,
                                     currentPubkey: currentPubkey,
                                     showAuthor: showAuthor,
-                                    showAvatar: showAvatar,
+                                    endsGroup: endsGroup,
                                     isHighlighted:
                                         reply.id == highlightedMessageId,
                                     allMessages: allMessages,

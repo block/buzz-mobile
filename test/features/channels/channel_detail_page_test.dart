@@ -19,7 +19,6 @@ import 'package:buzz/shared/me/me_sync.dart';
 import 'package:buzz/features/channels/me/me_page.dart';
 import 'package:buzz/shared/me/me_groups.dart';
 import 'package:flutter/semantics.dart';
-import 'package:buzz/features/channels/message_media_avatar.dart';
 
 import 'dart:async';
 
@@ -72,7 +71,6 @@ import 'package:buzz/features/channels/ime_metrics_settle_observer.dart';
 import 'package:buzz/features/channels/local_message_send_animation_provider.dart';
 import 'package:buzz/features/channels/local_send_bubble_surface.dart';
 import 'package:buzz/features/channels/message_action_backdrop_state.dart';
-import 'package:buzz/features/channels/message_author_visibility.dart';
 import 'package:buzz/features/channels/message_content.dart';
 import 'package:buzz/features/channels/mobile_huddle_controller.dart';
 import 'package:buzz/features/channels/reaction_row.dart';
@@ -1549,33 +1547,24 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        AvatarImage avatarIn(Finder row) => tester.widget<AvatarImage>(
+        AvatarImage bylineAvatar(String key) => tester.widget<AvatarImage>(
           find.descendant(
-            of: row,
-            matching: find.byWidgetPredicate(
-              (widget) =>
-                  widget is AvatarImage &&
-                  widget.radius == messageAvatarSize / 2,
+            of: find.ancestor(
+              of: find.byKey(ValueKey(key)),
+              matching: find.byType(TextButton),
             ),
+            matching: find.byType(AvatarImage),
           ),
         );
         expect(
-          avatarIn(
-            find.byKey(const ValueKey('message-row-$threadIdBotDashMessage')),
-          ).isAgent,
+          bylineAvatar('message-author-$threadIdBotDashMessage').isAgent,
           isTrue,
         );
 
-        await tester.tap(
-          find.byKey(const ValueKey('message-row-$threadIdBotDashMessage')),
-        );
+        await tester.tap(findRichText('Bot message'));
         await tester.pumpAndSettle();
         expect(
-          avatarIn(
-            find.byKey(
-              const ValueKey('thread-message-row-$threadIdBotDashMessage'),
-            ),
-          ).isAgent,
+          bylineAvatar('thread-message-author-$threadIdBotDashMessage').isAgent,
           isTrue,
         );
       },
@@ -6035,7 +6024,7 @@ void main() {
       for (final avatar in messageAvatars.evaluate()) {
         expect(
           tester.getSize(find.byWidget(avatar.widget)),
-          const Size.square(messageAvatarSize),
+          const Size.square(16),
         );
       }
       final aliceName = find.text('Alice');
@@ -6419,28 +6408,16 @@ void main() {
               .value,
           'Photo 1 of 2',
         );
-        expect(
-          carouselRect.left + Grid.xs,
-          tester
-              .getRect(find.byKey(const ValueKey('message-author-gallery')))
-              .left,
+        final galleryAvatar = find.descendant(
+          of: find.byKey(const ValueKey('message-row-gallery')),
+          matching: find.byType(AvatarImage),
         );
+        final avatarRect = tester.getRect(galleryAvatar);
+        expect(avatarRect.left, closeTo(carouselRect.left + Grid.xs, 0.01));
         expect(
           carouselRect.right,
           lessThanOrEqualTo(tester.view.physicalSize.width),
         );
-        final galleryAvatar = find.descendant(
-          of: find.byKey(const ValueKey('message-row-gallery')),
-          matching: find.byType(MessageMediaAvatar),
-        );
-        double avatarOpacity() => tester
-            .widget<Opacity>(
-              find
-                  .descendant(of: galleryAvatar, matching: find.byType(Opacity))
-                  .first,
-            )
-            .opacity;
-        expect(avatarOpacity(), 1);
         await tester.drag(carousel, const Offset(-140, 0));
         await tester.pumpAndSettle();
         expect(
@@ -6452,7 +6429,7 @@ void main() {
               .value,
           'Photo 2 of 2',
         );
-        expect(avatarOpacity(), 1);
+        expect(tester.getRect(galleryAvatar), avatarRect);
         await tester.drag(carousel, const Offset(140, 0));
         await tester.pumpAndSettle();
         expect(
@@ -6464,7 +6441,7 @@ void main() {
               .value,
           'Photo 1 of 2',
         );
-        expect(avatarOpacity(), 1);
+        expect(tester.getRect(galleryAvatar), avatarRect);
 
         final messageMaterial = find
             .ancestor(
@@ -7998,17 +7975,17 @@ void main() {
                 await tester.pump(const Duration(milliseconds: 16));
                 expect(
                   avatar('first'),
-                  findsNothing,
+                  findsOneWidget,
                   reason: 'first avatar frame $frame',
                 );
                 expect(
                   avatar('second'),
-                  findsOneWidget,
+                  findsNothing,
                   reason: 'second avatar frame $frame',
                 );
               }
               await tester.pumpAndSettle();
-              expect(avatar('second'), findsOneWidget);
+              expect(avatar('second'), findsNothing);
             } finally {
               debugDefaultTargetPlatformOverride = previousPlatform;
             }

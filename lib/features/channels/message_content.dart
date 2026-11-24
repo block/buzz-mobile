@@ -59,7 +59,6 @@ import 'message_mention_pill.dart';
 import 'message_gallery.dart';
 import 'message_gallery_frame.dart';
 import 'message_long_press_region.dart';
-import 'message_media_avatar.dart';
 import 'message_media_geometry.dart';
 import 'voice_note_attachment.dart';
 

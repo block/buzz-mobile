@@ -1024,7 +1024,7 @@ class _MessageList extends HookConsumerWidget {
                 final nextMessage = chronIdx + 1 < displayEntries.length
                     ? displayEntries[chronIdx + 1].first.message
                     : null;
-                final showAvatar =
+                final endsGroup =
                     message.hasAttachments ||
                     nextMessage == null ||
                     nextMessage.isSystem ||
@@ -1107,7 +1107,7 @@ class _MessageList extends HookConsumerWidget {
                             endsDay: endsDay,
                             showAuthor: showAuthor || isHandoff,
                             typingHandoff: isHandoff,
-                            showAvatar: showAvatar,
+                            endsGroup: endsGroup,
                             hasReplies: entry.summary != null,
                             replyFooter:
                                 entry.summary == null &&

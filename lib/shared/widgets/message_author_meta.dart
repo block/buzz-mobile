@@ -28,7 +28,10 @@ class MessageAuthorMeta extends StatelessWidget {
   /// Color applied to the username and [timestamp].
   final Color metadataColor;
 
-  /// Optional callback invoked when [displayName] is tapped.
+  /// Optional portrait shown beside [displayName].
+  final Widget? avatar;
+
+  /// Optional callback invoked when the author identity is tapped.
   final VoidCallback? onAuthorTap;
 
   /// Optional key assigned to the display-name text.
@@ -68,6 +71,7 @@ class MessageAuthorMeta extends StatelessWidget {
     this.showTimestamp = true,
     this.showIdentity = true,
     this.timestampGap = Grid.xxs,
+    this.avatar,
     this.onAuthorTap,
     this.displayNameKey,
     this.usernameKey,
@@ -90,15 +94,48 @@ class MessageAuthorMeta extends StatelessWidget {
       color: metadataColor,
     );
 
-    Widget authorName = Text(
+    final name = Text(
       displayName,
       key: displayNameKey,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: resolvedNameStyle,
     );
-    if (onAuthorTap != null) {
-      authorName = GestureDetector(onTap: onAuthorTap, child: authorName);
+    final portrait = avatar;
+    final onTap = onAuthorTap;
+    Widget identity = name;
+    if (portrait != null) {
+      identity = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ExcludeSemantics(child: portrait),
+          const SizedBox(width: Grid.half),
+          Flexible(child: name),
+        ],
+      );
+      if (onTap != null) {
+        final minimum = Theme.of(context).platform == TargetPlatform.iOS
+            ? 44.0
+            : kMinInteractiveDimension;
+        identity = Semantics(
+          label: 'Open $displayName profile',
+          button: true,
+          onTap: onTap,
+          excludeSemantics: true,
+          child: TextButton(
+            onPressed: onTap,
+            style: TextButton.styleFrom(
+              minimumSize: Size.square(minimum),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              alignment: AlignmentDirectional.centerStart,
+              padding: EdgeInsets.zero,
+            ),
+            child: identity,
+          ),
+        );
+      }
+    } else if (onTap != null) {
+      identity = GestureDetector(onTap: onTap, child: name);
     }
 
     return LayoutBuilder(
@@ -108,7 +145,7 @@ class MessageAuthorMeta extends StatelessWidget {
             : double.infinity;
 
         final children = <Widget>[
-          if (showIdentity) Flexible(child: authorName),
+          if (showIdentity) Flexible(child: identity),
           if (showIdentity && showUsername) ...[
             const SizedBox(width: Grid.half),
             ConstrainedBox(

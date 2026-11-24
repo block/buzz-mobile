@@ -4,6 +4,48 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
+    testWidgets('inline identity is a single profile button on $platform', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      const portrait = Key('portrait');
+      var opened = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light().copyWith(platform: platform),
+          home: Scaffold(
+            body: SizedBox(
+              width: 220,
+              child: MessageAuthorMeta(
+                avatar: const SizedBox.square(key: portrait, dimension: 16),
+                displayName: 'Al',
+                timestamp: '2m',
+                nameColor: Colors.black,
+                metadataColor: Colors.grey,
+                onAuthorTap: () => opened++,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final button = find.byType(TextButton);
+      final target = tester.getRect(button);
+      final minimum = platform == TargetPlatform.iOS ? 44 : 48;
+      expect(target.height, greaterThanOrEqualTo(minimum));
+      expect(target.width, greaterThanOrEqualTo(minimum));
+      expect(find.bySemanticsLabel('Open Al profile'), findsOneWidget);
+      await tester.tapAt(tester.getCenter(find.byKey(portrait)));
+      await tester.tap(find.text('Al'));
+      await tester.tapAt(target.topLeft + const Offset(4, 4));
+      expect(opened, 3);
+      await tester.tap(find.text('2m'));
+      expect(opened, 3);
+      semantics.dispose();
+    });
+  }
+
   testWidgets(
     'hidden identity stays accessible without a visible name or gap',
     (tester) async {

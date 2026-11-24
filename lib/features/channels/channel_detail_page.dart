@@ -1,6 +1,5 @@
 import '../../shared/widgets/duo_toolbar.dart';
 import 'composer_geometry.dart';
-import 'message_author_visibility.dart';
 
 import 'package:buzz/shared/widgets/feedback_snackbar.dart';
 
@@ -62,7 +61,7 @@ import '../../shared/widgets/frosted_scaffold.dart';
 import '../../shared/widgets/flapping_bee.dart';
 import '../../shared/widgets/keyboard_dismiss_on_drag.dart';
 import '../../shared/widgets/load_error_view.dart';
-import '../../shared/widgets/message_author_meta.dart';
+import 'message_sender_byline.dart';
 import '../../shared/widgets/skeleton.dart';
 import '../../shared/profile/user_cache_provider.dart';
 import '../../shared/profile/user_profile.dart';
@@ -102,7 +101,6 @@ import 'message_action_backdrop_state.dart';
 import 'message_long_press_region.dart';
 import 'message_content.dart';
 import '../../shared/widgets/message_attachment_corners.dart';
-import 'message_media_avatar.dart';
 import 'message_skeleton_body.dart';
 import '../../shared/read_state/deferred_read_state_update.dart';
 import '../../shared/read_state/read_state_provider.dart';

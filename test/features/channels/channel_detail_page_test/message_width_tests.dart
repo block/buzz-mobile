@@ -72,19 +72,9 @@ void messageWidthTests() {
                 )
                 .first;
             final rect = tester.getRect(bubble);
-            final avatar = find.descendant(
-              of: row,
-              matching: find.byType(MessageMediaAvatar),
-            );
-            if (avatar.evaluate().isNotEmpty) {
-              expect(
-                tester.getRect(avatar.first).bottom,
-                closeTo(rect.bottom, 0.01),
-              );
-            }
             bounds.add(rect);
             expect(rect.right, closeTo(tester.getRect(row).right, 0.01));
-            expect(rect.width, greaterThan(width * 2 / 3));
+            expect(rect.left, closeTo(tester.getRect(row).left, 0.01));
             final paragraph = tester.widget<RichText>(
               find
                   .descendant(of: bubble, matching: find.byType(RichText))
