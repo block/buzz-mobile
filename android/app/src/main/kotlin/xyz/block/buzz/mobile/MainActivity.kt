@@ -132,6 +132,7 @@ class MainActivity : FlutterFragmentActivity() {
     private val ageSignalRequest = AgeSignalRequest()
     private var huddleMediaPlugin: HuddleMediaPlugin? = null
     private var hapticsPlugin: HapticsPlugin? = null
+    private var watchPairingPlugin: WatchPairingPlugin? = null
     private var hostedHpkePlugin: HostedHpkePlugin? = null
     private var identityFilePlugin: IdentityFilePlugin? = null
     private var browserAuthPlugin: BrowserAuthPlugin? = null
@@ -146,6 +147,7 @@ class MainActivity : FlutterFragmentActivity() {
         identityFilePlugin = IdentityFilePlugin(this, flutterEngine.dartExecutor.binaryMessenger)
         browserAuthPlugin = BrowserAuthPlugin(this, flutterEngine.dartExecutor.binaryMessenger)
         hapticsPlugin = HapticsPlugin(this, flutterEngine.dartExecutor.binaryMessenger)
+        watchPairingPlugin = WatchPairingPlugin(this, flutterEngine.dartExecutor.binaryMessenger)
 
         huddleMediaPlugin = HuddleMediaPlugin(
             this,
@@ -244,6 +246,8 @@ class MainActivity : FlutterFragmentActivity() {
         hostedHpkePlugin = null
         hapticsPlugin?.dispose()
         hapticsPlugin = null
+        watchPairingPlugin?.dispose()
+        watchPairingPlugin = null
         ageSignalRequest.retire()
         huddleMediaPlugin?.dispose()
         huddleMediaPlugin = null

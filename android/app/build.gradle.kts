@@ -200,6 +200,8 @@ dependencies {
     implementation("com.google.android.play:age-signals:0.0.4")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.browser:browser:1.9.0")
+    // Pairing a watch: the Wear Data Layer.
+    implementation("com.google.android.gms:play-services-wearable:19.0.0")
 
     testImplementation(kotlin("test"))
 
