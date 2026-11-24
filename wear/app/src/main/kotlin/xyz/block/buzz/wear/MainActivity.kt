@@ -14,10 +14,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.wear.compose.foundation.SwipeToDismissKeys
+import androidx.wear.compose.material.SwipeToDismissBox
 import org.json.JSONArray
 import org.json.JSONObject
 import xyz.block.buzz.wear.core.Attachment
@@ -49,7 +52,6 @@ class MainActivity : ComponentActivity() {
     private var heard by mutableStateOf("")
     private var listening by mutableStateOf(ListenState.Listening)
     private var recognizer: SpeechRecognizer? = null
-    private var backToCompose = false
     private val micPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) listen()
     }
@@ -80,59 +82,71 @@ class MainActivity : ComponentActivity() {
         setContent {
             BuzzWatchTheme {
                 BackHandler(enabled = screen != Screen.Chat, onBack = ::back)
-                when (screen) {
-                    Screen.Chat -> Conversation(
-                        status = status,
-                        title = channel?.name ?: "Buzz",
-                        lines = lines,
-                        busy = busy,
-                        media = media,
-                        onView = {
-                            viewing = it
-                            screen = Screen.Image
-                        },
-                        enabled = status == "Connected" && channel != null,
-                        onSpeak = { screen = Screen.Compose },
-                        onPick = { if (channels.isNotEmpty()) screen = Screen.Channels },
-                    )
-                    Screen.Channels -> Picker("Channel", channels, channel?.id, media, onBack = { screen = Screen.Chat }) {
-                        open(it)
-                    }
-                    Screen.Agents -> Picker("Talk to", agents, agent?.id, media, onBack = ::afterAgentPicker) {
-                        choose(it)
-                        afterAgentPicker()
-                    }
-                    Screen.Compose -> ComposeChoice(
-                        agent = agentLabel(),
-                        picture = agent?.picture,
-                        media = media,
-                        canChange = agents.size > 1,
-                        onPickAgent = {
-                            backToCompose = true
-                            screen = Screen.Agents
-                        },
-                        onEmoji = { screen = Screen.Emoji },
-                        onMic = ::speak,
-                        onKeyboard = { screen = Screen.Type },
-                        onBack = ::back,
-                    )
-                    Screen.Listen -> Listen(
-                        agent = agentLabel(),
-                        picture = agent?.picture,
-                        media = media,
-                        heard = heard,
-                        state = listening,
-                        onSend = { deliver(heard) },
-                        onRetry = ::listen,
-                        onBack = ::back,
-                    )
-                    Screen.Type -> Type(agentLabel(), agent?.picture, media, onSend = ::deliver, onBack = ::back)
-                    Screen.Emoji -> EmojiChoice(onPick = ::deliver, onBack = ::back)
-                    Screen.Image -> FullImage(viewing, media) { screen = Screen.Chat }
+                // The Wear OS way back: swipe from the left edge. The screen
+                // you would return to shows underneath as you drag. From the
+                // conversation, the same swipe leaves the app.
+                SwipeToDismissBox(
+                    onDismissed = { if (screen == Screen.Chat) finish() else back() },
+                    backgroundKey = previous(screen) ?: SwipeToDismissKeys.Background,
+                    contentKey = screen,
+                ) { isBackground ->
+                    val shown = if (isBackground) previous(screen) else screen
+                    if (shown != null) Show(shown)
                 }
             }
         }
         reconnect()
+    }
+
+    @Composable
+    private fun Show(shown: Screen) {
+        when (shown) {
+            Screen.Chat -> Conversation(
+                status = status,
+                title = channel?.name ?: "Buzz",
+                lines = lines,
+                busy = busy,
+                media = media,
+                onView = {
+                    viewing = it
+                    screen = Screen.Image
+                },
+                enabled = status == "Connected" && channel != null,
+                onSpeak = { screen = Screen.Compose },
+                onPick = { if (channels.isNotEmpty()) screen = Screen.Channels },
+            )
+            Screen.Channels -> Picker("Channel", channels, channel?.id, media, onBack = { screen = Screen.Chat }) {
+                open(it)
+            }
+            Screen.Agents -> Picker("Talk to", agents, agent?.id, media, onBack = ::back) {
+                choose(it)
+                back()
+            }
+            Screen.Compose -> ComposeChoice(
+                agent = agentLabel(),
+                picture = agent?.picture,
+                media = media,
+                canChange = agents.size > 1,
+                onPickAgent = { screen = Screen.Agents },
+                onEmoji = { screen = Screen.Emoji },
+                onMic = ::speak,
+                onKeyboard = { screen = Screen.Type },
+                onBack = ::back,
+            )
+            Screen.Listen -> Listen(
+                agent = agentLabel(),
+                picture = agent?.picture,
+                media = media,
+                heard = heard,
+                state = listening,
+                onSend = { deliver(heard) },
+                onRetry = ::listen,
+                onBack = ::back,
+            )
+            Screen.Type -> Type(agentLabel(), agent?.picture, media, onSend = ::deliver, onBack = ::back)
+            Screen.Emoji -> EmojiChoice(onPick = ::deliver, onBack = ::back)
+            Screen.Image -> FullImage(viewing, media) { screen = Screen.Chat }
+        }
     }
 
     override fun onResume() {
@@ -290,18 +304,17 @@ class MainActivity : ComponentActivity() {
     /** One step back: from an input to the input choice, from anywhere else to the conversation. */
     private fun back() {
         stopListening()
-        screen = when (screen) {
-            Screen.Listen, Screen.Type, Screen.Emoji -> Screen.Compose
-            else -> Screen.Chat
-        }
+        screen = previous(screen) ?: Screen.Chat
+    }
+
+    /** Where back leads from [from]; null from the conversation, which is the way out of the app. */
+    private fun previous(from: Screen): Screen? = when (from) {
+        Screen.Chat -> null
+        Screen.Listen, Screen.Type, Screen.Emoji, Screen.Agents -> Screen.Compose
+        Screen.Channels, Screen.Compose, Screen.Image -> Screen.Chat
     }
 
     private fun agentLabel() = agent?.name ?: channel?.name ?: "Buzz"
-
-    private fun afterAgentPicker() {
-        screen = if (backToCompose) Screen.Compose else Screen.Chat
-        backToCompose = false
-    }
 
     /** Send what was composed and return to the conversation. */
     private fun deliver(text: String) {

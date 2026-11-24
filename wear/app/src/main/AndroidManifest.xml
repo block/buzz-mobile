@@ -15,7 +15,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="Buzz"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:theme="@android:style/Theme.DeviceDefault">
+        android:theme="@style/BuzzWatch">
         <!-- Works with no phone nearby once paired: the watch connects on its own. -->
         <meta-data
             android:name="com.google.android.wearable.standalone"
