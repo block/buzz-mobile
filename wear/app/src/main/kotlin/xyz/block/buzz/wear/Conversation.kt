@@ -416,6 +416,8 @@ internal fun Picker(
     selected: String?,
     media: MediaFetcher?,
     onBack: () -> Unit,
+    switcher: String? = null,
+    onSwitch: () -> Unit = {},
     onPick: (Choice) -> Unit,
 ) {
     val list = rememberScalingLazyListState()
@@ -432,6 +434,20 @@ internal fun Picker(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
+            }
+            if (switcher != null) {
+                item {
+                    Chip(
+                        label = {
+                            Text(switcher, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                            Glyph(BuzzIcon.ChevronDown, size = 16.dp)
+                        },
+                        onClick = onSwitch,
+                        colors = ChipDefaults.outlinedChipColors(),
+                        border = ChipDefaults.outlinedChipBorder(),
+                        modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Community: $switcher. Change" },
+                    )
+                }
             }
             items(options) { option ->
                 Chip(

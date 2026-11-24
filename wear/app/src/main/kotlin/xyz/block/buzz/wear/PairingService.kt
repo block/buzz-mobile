@@ -3,7 +3,6 @@ package xyz.block.buzz.wear
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.WearableListenerService
 import org.json.JSONObject
-import xyz.block.buzz.wear.core.WatchKey
 
 /**
  * Receives the pairing from the owner's phone over the Wear Data Layer. The
@@ -13,15 +12,16 @@ import xyz.block.buzz.wear.core.WatchKey
 class PairingService : WearableListenerService() {
     override fun onMessageReceived(event: MessageEvent) {
         if (event.path != PAIR_PATH) return
-        val pairing = runCatching {
-            val json = JSONObject(String(event.data))
-            val relay = json.getString("relay")
-            val secret = json.getString("secret")
-            require(relay.startsWith("wss://"))
-            WatchKey.fromHex(secret)
-            Pairing(relay, secret)
-        }.getOrNull() ?: return
-        SecretStore.save(this, pairing)
+        val json = runCatching { JSONObject(String(event.data)) }.getOrNull() ?: return
+        // One entry per community the owner chose on the phone.
+        val list = json.optJSONArray("communities")
+        val pairings = if (list == null) {
+            listOfNotNull(Pairing.from(json))
+        } else {
+            (0 until list.length()).mapNotNull { index -> list.optJSONObject(index)?.let(Pairing::from) }
+        }.distinctBy { it.relayUrl }
+        if (pairings.isEmpty()) return
+        SecretStore.save(this, pairings, json.optString("active"))
     }
 }
 

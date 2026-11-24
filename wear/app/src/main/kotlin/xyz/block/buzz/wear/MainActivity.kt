@@ -33,15 +33,17 @@ import java.util.concurrent.Executors
 
 internal data class Line(val mine: Boolean, val text: String, val media: List<Attachment> = emptyList())
 
-/** Something to pick from a list: a channel or an agent. */
+/** Something to pick from a list: a community, a channel or an agent. */
 internal data class Choice(val id: String, val name: String, val picture: String? = null)
 
-private enum class Screen { Chat, Channels, Agents, Compose, Listen, Type, Emoji, Image }
+private enum class Screen { Chat, Channels, Communities, Agents, Compose, Listen, Type, Emoji, Image }
 
 class MainActivity : ComponentActivity() {
     private val io = Executors.newSingleThreadExecutor()
     private var status by mutableStateOf("Not paired")
     private val lines = mutableStateListOf<Line>()
+    private var communities by mutableStateOf(emptyList<Choice>())
+    private var community by mutableStateOf<Choice?>(null)
     private var channels by mutableStateOf(emptyList<Choice>())
     private var agents by mutableStateOf(emptyList<Choice>())
     private var channel by mutableStateOf<Choice?>(null)
@@ -117,12 +119,20 @@ class MainActivity : ComponentActivity() {
                     },
                     enabled = status == "Connected" && channel != null,
                     onSpeak = { screen = Screen.Compose },
-                    onPick = { if (channels.isNotEmpty()) screen = Screen.Channels },
+                    onPick = { if (channels.isNotEmpty() || communities.size > 1) screen = Screen.Channels },
                 )
             }
-            Screen.Channels -> Picker("Channel", channels, channel?.id, media, onBack = { screen = Screen.Chat }) {
-                open(it)
-            }
+            Screen.Channels -> Picker(
+                title = "Channel",
+                options = channels,
+                selected = channel?.id,
+                media = media,
+                onBack = ::back,
+                // With more than one community paired, this is where you switch.
+                switcher = community?.name?.takeIf { communities.size > 1 },
+                onSwitch = { screen = Screen.Communities },
+            ) { open(it) }
+            Screen.Communities -> Picker("Community", communities, community?.id, media, onBack = ::back) { enter(it) }
             Screen.Agents -> Picker("Talk to", agents, agent?.id, media, onBack = ::back) {
                 choose(it)
                 back()
@@ -177,8 +187,11 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun reconnect() {
+        val all = SecretStore.loadAll(this)
         val paired = SecretStore.load(this) ?: return
         pairing = paired
+        communities = all.map { Choice(it.relayUrl, it.name) }
+        community = Choice(paired.relayUrl, paired.name)
         status = CONNECTING
         io.execute {
             connection?.close()
@@ -197,7 +210,8 @@ class MainActivity : ComponentActivity() {
                 me = key.pubkey
                 connection = relay
                 val found = myChannels(relay)
-                val stored = SecretStore.prefs(this).getString("channel", null)
+                val prefs = SecretStore.prefs(this)
+                val stored = prefs.getString("channel:${paired.relayUrl}", null) ?: prefs.getString("channel", null)
                 val first = found.firstOrNull { it.id == stored }
                     ?: found.firstOrNull { it.name == "watch" }
                     ?: found.firstOrNull()
@@ -224,6 +238,22 @@ class MainActivity : ComponentActivity() {
                 if (id == null || name.isNullOrBlank()) null else Choice(id, name)
             }
             .sortedBy { it.name.lowercase() }
+    }
+
+    /** Switch to another paired community; it opens on the channel last used there. */
+    private fun enter(picked: Choice) {
+        screen = Screen.Chat
+        if (picked.id == community?.id) return
+        SecretStore.choose(this, picked.id)
+        channel = null
+        channels = emptyList()
+        agents = emptyList()
+        agent = null
+        lines.clear()
+        shown.clear()
+        working.clear()
+        refreshBusy()
+        reconnect()
     }
 
     private fun open(picked: Choice) {
@@ -253,7 +283,7 @@ class MainActivity : ComponentActivity() {
         val chosen = found.firstOrNull { it.id == prefs.getString("agent:${picked.id}", null) } ?: found.firstOrNull()
         val history = relay.query(filter(9).put("#h", JSONArray(listOf(picked.id))).put("limit", 10))
             .sortedBy { it.createdAt }
-        prefs.edit().putString("channel", picked.id).apply()
+        pairing?.let { prefs.edit().putString("channel:${it.relayUrl}", picked.id).apply() }
         runOnUiThread {
             channel = picked
             agents = found
@@ -316,6 +346,7 @@ class MainActivity : ComponentActivity() {
     private fun previous(from: Screen): Screen? = when (from) {
         Screen.Chat -> null
         Screen.Listen, Screen.Type, Screen.Emoji, Screen.Agents -> Screen.Compose
+        Screen.Communities -> Screen.Channels
         Screen.Channels, Screen.Compose, Screen.Image -> Screen.Chat
     }
 

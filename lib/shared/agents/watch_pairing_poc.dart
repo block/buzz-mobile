@@ -11,17 +11,30 @@ Future<List<String>> connectedWatches() async {
   return names ?? const [];
 }
 
-/// Proof of concept: makes the watch the same identity as this phone by
-/// handing it [ownerNsec] and the relay to use. The key travels over the
-/// system's phone-to-watch link, which delivers only to this app on a watch
-/// paired with this phone. It never touches the relay.
+/// One community to put on the watch: its name, relay and the owner's key there.
+typedef WatchCommunity = ({String name, String relayWsUrl, String ownerNsec});
+
+/// Proof of concept: makes the watch the same identity as this phone in each
+/// of [communities], by handing it the relay and the owner's key for each.
+/// [activeRelayWsUrl] is the one the watch opens first. The keys travel over
+/// the system's phone-to-watch link, which delivers only to this app on a
+/// watch paired with this phone. They never touch a relay.
+///
+/// This replaces whatever the watch held before.
 Future<void> pairWatch({
-  required String ownerNsec,
-  required String relayWsUrl,
+  required List<WatchCommunity> communities,
+  required String activeRelayWsUrl,
 }) async {
   final payload = jsonEncode({
-    'relay': relayWsUrl,
-    'secret': nostr.Keys(ownerNsec).secret,
+    'active': activeRelayWsUrl,
+    'communities': [
+      for (final community in communities)
+        {
+          'name': community.name,
+          'relay': community.relayWsUrl,
+          'secret': nostr.Keys(community.ownerNsec).secret,
+        },
+    ],
   });
   await _channel.invokeMethod<int>(
     'pair',

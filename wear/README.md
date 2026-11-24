@@ -14,15 +14,21 @@ Wear OS:
 ## How it signs in
 
 The watch signs in as you. In a debug build of the phone app, Settings has
-**Pair watch**: after you confirm, the phone sends the relay address and your
-key to the watch over the Wear Data Layer. The system delivers that message
-only to the same app, signed with the same certificate, on a watch paired
-with the phone. The watch stores the key encrypted under a key held in the
-Android Keystore.
+**Pair watch**. It lists your communities, with only the one you are using
+ticked. After you confirm, the phone sends the watch, for each ticked
+community, its name, its relay address and your key there, over the Wear Data
+Layer. The system delivers that message only to the same app, signed with the
+same certificate, on a watch paired with the phone. The watch stores the keys
+encrypted under a key held in the Android Keystore.
 
-A lost watch therefore holds your identity. Pair only a watch with a screen
-lock. There is no unpair action yet; uninstalling the watch app removes the
-key.
+Pairing again replaces what the watch holds, so that is also how you add or
+drop a community. With more than one on the watch, the top of the channel
+list shows the current community; tap it to switch. The watch keeps one relay
+connection at a time and remembers the last channel used in each community.
+
+A lost watch therefore holds your identity in every community you put on it.
+Pair only a watch with a screen lock. There is no unpair action yet;
+uninstalling the watch app removes the keys.
 
 ## Build and install
 
